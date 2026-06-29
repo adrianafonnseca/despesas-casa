@@ -209,7 +209,7 @@
     </div>
 
     <!-- Parcela -->
-    <div id="form-parcela" class="secao-oculta">
+    <div id="form-parcela" style="display:none">
       <div class="field">
         <label><span class="dot dot-orange"></span>Compra parcelada</label>
         <select id="parcela-nome">
@@ -236,7 +236,7 @@
     </div>
 
     <!-- Extra -->
-    <div id="form-extra" class="secao-oculta">
+    <div id="form-extra" style="display:none">
       <div class="field">
         <label><span class="dot dot-purple"></span>Descrição</label>
         <input type="text" id="extra-desc" placeholder="Ex: Presente, Remédio, Viagem…" />
@@ -314,9 +314,9 @@
     document.querySelectorAll(".tab").forEach((t, i) => {
       t.classList.toggle("ativo", ["fixa","parcela","extra"][i] === tipo);
     });
-    document.getElementById("form-fixa").style.display    = tipo === "fixa"    ? "" : "none";
-    document.getElementById("form-parcela").style.display = tipo === "parcela" ? "" : "none";
-    document.getElementById("form-extra").style.display   = tipo === "extra"   ? "" : "none";
+    document.getElementById("form-fixa").style.display = tipo === "fixa" ? "block" : "none";
+    document.getElementById("form-parcela").style.display = tipo === "parcela" ? "block" : "none";
+    document.getElementById("form-extra").style.display = tipo === "extra" ? "block" : "none";
   }
 
   document.getElementById("parcela-nome").addEventListener("change", function() {
