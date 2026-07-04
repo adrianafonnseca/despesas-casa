@@ -437,9 +437,17 @@
       container.innerHTML = '<div class="lista-vazia">Nenhuma despesa lançada ainda 💸</div>';
       return;
     }
+    // Criar cópia ordenada com índice original
+    var lista = [];
+    for (var i = 0; i < despesas.length; i++) {
+      lista.push({ d: despesas[i], idx: i });
+    }
+    lista.reverse();
+
     var html = "";
-    for (var i = despesas.length - 1; i >= 0; i--) {
-      var d = despesas[i];
+    for (var j = 0; j < lista.length; j++) {
+      var d = lista[j].d;
+      var idx = lista[j].idx;
       var respClass = d.responsavel === "Adriana" ? "resp-adriana" : d.responsavel === "Washington" ? "resp-washington" : "resp-ambos";
       var tipoClass = d.tipo === "fixa" ? "tipo-fixa" : d.tipo === "parcela" ? "tipo-parcela" : "tipo-extra";
       var tipoLabel = d.tipo === "fixa" ? "Fixa" : d.tipo === "parcela" ? "Parcela" : "Extra";
@@ -452,7 +460,7 @@
       html += '</div>';
       html += '<div class="item-direita">';
       html += '<div class="item-valor">' + fmt(d.valor) + '</div>';
-      html += '<button class="btn-excluir" onclick="excluir(' + i + ')">🗑️ Excluir</button>'; // i é o índice real no array
+      html += '<button class="btn-excluir" onclick="excluir(' + idx + ')">🗑️ Excluir</button>';
       html += '</div>';
       html += '</div>';
     }
