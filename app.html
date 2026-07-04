@@ -407,27 +407,7 @@
     document.getElementById("saldo-texto").textContent = saldo;
   }
 
-  function excluir(idx) {
-    if (idx < 0 || idx >= despesas.length) { alert("Erro ao localizar item."); return; }
-    var item = despesas[idx];
-    if (!confirm('Excluir "' + item.nome + '"?')) return;
 
-    var novaLista = [];
-    for (var i = 0; i < despesas.length; i++) {
-      if (i !== idx) novaLista.push(despesas[i]);
-    }
-    despesas = novaLista;
-    localStorage.setItem("despesas-" + mesAtual, JSON.stringify(despesas));
-    renderizar();
-    mostrarMsg("Despesa excluida!", "success");
-
-    fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ acao: "excluir", nome: item.nome, valor: item.valor, responsavel: item.responsavel, mes: item.mes })
-    }).catch(function() {});
-  }
 
   function renderizar() {
     const container = document.getElementById("lista-itens");
@@ -460,7 +440,7 @@
       html += '</div>';
       html += '<div class="item-direita">';
       html += '<div class="item-valor">' + fmt(d.valor) + '</div>';
-      html += '<button class="btn-excluir" onclick="excluir(' + idx + ')">🗑️ Excluir</button>';
+      html += '<button class="btn-excluir" data-idx="' + idx + '">🗑️ Excluir</button>';
       html += '</div>';
       html += '</div>';
     }
@@ -549,6 +529,21 @@
     var msg = document.getElementById("msg");
     msg.textContent = texto; msg.className = "msg " + tipo;
   }
+
+  // Listener global para botões excluir
+  document.addEventListener('click', function(e) {
+    if (e.target && e.target.classList.contains('btn-excluir')) {
+      var idx = parseInt(e.target.getAttribute('data-idx'));
+      if (isNaN(idx)) return;
+      var item = despesas[idx];
+      if (!item) return;
+      if (!confirm('Excluir "' + item.nome + '"?')) return;
+      despesas.splice(idx, 1);
+      localStorage.setItem("despesas-" + mesAtual, JSON.stringify(despesas));
+      renderizar();
+      alert('Despesa excluida com sucesso!');
+    }
+  });
 
   renderizar();
 </script>
