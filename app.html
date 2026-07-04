@@ -538,10 +538,28 @@
       var item = despesas[idx];
       if (!item) return;
       if (!confirm('Excluir "' + item.nome + '"?')) return;
+
+      // Remove do array
       despesas.splice(idx, 1);
-      localStorage.setItem("despesas-" + mesAtual, JSON.stringify(despesas));
+
+      // Salva imediatamente no localStorage
+      var chave = "despesas-" + mesAtual;
+      localStorage.removeItem(chave);
+      localStorage.setItem(chave, JSON.stringify(despesas));
+
+      // Confirma que foi salvo
+      var verificacao = JSON.parse(localStorage.getItem(chave) || "[]");
+      console.log("Após exclusão: " + verificacao.length + " itens");
+
+      // Remove da planilha
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ acao: "excluir", nome: item.nome, valor: item.valor, responsavel: item.responsavel, mes: item.mes })
+      }).catch(function() {});
+
       renderizar();
-      alert('Despesa excluida com sucesso!');
     }
   });
 
