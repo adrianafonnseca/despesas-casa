@@ -409,6 +409,7 @@
 
   function excluir(idx) {
     var item = despesas[idx];
+    if (!item) return;
     if (!confirm('Excluir "' + item.nome + '"?')) return;
     fetch(SCRIPT_URL, {
       method: "POST",
@@ -424,8 +425,8 @@
     }).catch(function() {});
     despesas.splice(idx, 1);
     salvar();
-    renderizar();
     mostrarMsg("🗑️ Despesa excluída!", "success");
+    renderizar();
   }
 
   function renderizar() {
@@ -451,7 +452,7 @@
       html += '</div>';
       html += '<div class="item-direita">';
       html += '<div class="item-valor">' + fmt(d.valor) + '</div>';
-      html += '<button class="btn-excluir" onclick="excluir(' + i + ')">🗑️ Excluir</button>';
+      html += '<button class="btn-excluir" onclick="excluir(' + i + ')">🗑️ Excluir</button>'; // i é o índice real no array
       html += '</div>';
       html += '</div>';
     }
