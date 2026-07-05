@@ -273,7 +273,7 @@
               role: "user",
               content: [
                 { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
-                { type: "text", text: 'Analise esta nota fiscal ou fatura e extraia as informações. Responda APENAS em JSON, sem texto adicional, no formato:\n{\n  "fornecedor": "nome do fornecedor ou estabelecimento",\n  "valor": 0.00\n}\nO valor deve ser número sem R$ ou vírgula (use ponto decimal).' }
+                { type: "text", text: 'Você é um especialista em leitura de documentos financeiros brasileiros. Analise esta imagem de nota fiscal, fatura, boleto ou conta e extraia as informações mesmo que a imagem esteja inclinada ou com baixa qualidade.\n\nProcure por:\n- Nome da empresa, concessionária ou estabelecimento (ex: Energisa, Sky, Netflix, Pernambucanas, Condomínio, etc)\n- Valor total a pagar (procure por "Total", "Valor a pagar", "Valor do documento", "R$")\n\nResponda APENAS em JSON puro, sem texto adicional, sem markdown:\n{\n  "fornecedor": "nome do fornecedor",\n  "valor": 0.00\n}\nO valor deve ser número com ponto decimal (ex: 298.02). Se não encontrar algum dado, use string vazia ou zero.' }
               ]
             }]
           })
