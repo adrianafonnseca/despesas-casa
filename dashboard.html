@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Despesas da Casa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --azul: #3b82f6;
+      --rosa: #ec4899;
+      --roxo: #a855f7;
+      --verde: #10b981;
+      --laranja: #f59e0b;
+      --cinza: #6b7280;
+      --bg: #f1f4fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #9ca3af;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1.5rem 1rem 4rem;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; }
+
+    /* Header */
+    .top-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .top-header h1 {
+      font-family: 'Nunito', sans-serif; font-size: 1.6rem; font-weight: 900;
+      background: linear-gradient(90deg, var(--azul), var(--roxo), var(--rosa));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .top-header p { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+
+    /* Filtros */
+    .filtros {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem;
+    }
+    .filtro-btn {
+      padding: 0.45rem 1rem; border: 2px solid #e5e7eb; border-radius: 99px;
+      font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700;
+      cursor: pointer; background: #fff; color: var(--cinza); transition: all 0.15s;
+    }
+    .filtro-btn.ativo { border-color: var(--roxo); background: #f3e8ff; color: #7c3aed; }
+
+    select.filtro-select {
+      padding: 0.45rem 1rem; border: 2px solid #e5e7eb; border-radius: 99px;
+      font-family: 'Nunito', sans-serif; font-size: 0.82rem; font-weight: 700;
+      cursor: pointer; background: #fff; color: var(--cinza); outline: none;
+    }
+
+    /* Cards de resumo */
+    .resumo-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    .resumo-card {
+      background: var(--card); border-radius: 18px; padding: 1.25rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .resumo-card .rc-label {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .resumo-card .rc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .resumo-card .rc-valor {
+      font-family: 'Nunito', sans-serif; font-size: 1.5rem; font-weight: 900; color: var(--text);
+    }
+    .resumo-card .rc-sub { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+
+    /* Acerto */
+    .acerto-card {
+      background: linear-gradient(135deg, #f3e8ff, #fce7f3);
+      border-radius: 18px; padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem; display: flex;
+      align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+      box-shadow: 0 2px 12px rgba(168,85,247,0.1);
+    }
+    .acerto-card .ac-label { font-size: 0.78rem; font-weight: 700; color: #7c3aed; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+    .acerto-card .ac-valor { font-family: 'Nunito', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--text); }
+
+    /* Gráficos */
+    .graficos-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1rem; margin-bottom: 1.5rem;
+    }
+    @media (max-width: 600px) { .graficos-grid { grid-template-columns: 1fr; } }
+
+    .grafico-card {
+      background: var(--card); border-radius: 18px; padding: 1.25rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .grafico-card h3 {
+      font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800;
+      color: var(--text); margin-bottom: 1rem;
+    }
+    .grafico-wrap { position: relative; height: 200px; }
+
+    /* Tabela */
+    .tabela-card {
+      background: var(--card); border-radius: 18px; padding: 1.25rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow-x: auto;
+    }
+    .tabela-card h3 {
+      font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800;
+      color: var(--text); margin-bottom: 1rem;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th {
+      text-align: left; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--muted); padding: 0.5rem 0.75rem;
+      border-bottom: 2px solid #f3f4f6;
+    }
+    td { padding: 0.65rem 0.75rem; border-bottom: 1px solid #f9fafb; color: var(--text); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+
+    .tag {
+      display: inline-block; font-size: 0.68rem; font-weight: 700;
+      padding: 2px 8px; border-radius: 99px;
+    }
+    .tag-fixa { background: #d1fae5; color: #065f46; }
+    .tag-parcela { background: #fef3c7; color: #92400e; }
+    .tag-extra { background: #ede9fe; color: #5b21b6; }
+    .tag-adriana { background: #fce7f3; color: #db2777; }
+    .tag-washington { background: #eff6ff; color: #2563eb; }
+    .tag-ambos { background: #f3e8ff; color: #7c3aed; }
+
+    .td-valor { font-family: 'Nunito', sans-serif; font-weight: 800; text-align: right; white-space: nowrap; }
+
+    .vazio { text-align: center; color: var(--muted); padding: 2rem; font-size: 0.95rem; }
+    .footer { text-align: center; margin-top: 2rem; font-size: 0.8rem; color: var(--muted); }
+    .footer span { color: var(--rosa); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="top-header">
+    <div>
+      <h1>📊 Despesas da Casa</h1>
+      <p>Relatório financeiro do casal</p>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      <select class="filtro-select" id="sel-ano" onchange="aplicarFiltro()"></select>
+    </div>
+  </div>
+
+  <!-- Filtros de período -->
+  <div class="filtros">
+    <button class="filtro-btn ativo" id="btn-mensal" onclick="mudarPeriodo('mensal')">Mensal</button>
+    <button class="filtro-btn" id="btn-acumulado" onclick="mudarPeriodo('acumulado')">Acumulado</button>
+    <button class="filtro-btn" id="btn-ano" onclick="mudarPeriodo('ano')">Ano completo</button>
+    <select class="filtro-select" id="sel-mes" onchange="aplicarFiltro()"></select>
+  </div>
+
+  <!-- Cards de resumo -->
+  <div class="resumo-grid">
+    <div class="resumo-card">
+      <div class="rc-label"><span class="rc-dot" style="background:var(--rosa)"></span>Adriana pagou</div>
+      <div class="rc-valor" id="rc-adriana">R$ 0,00</div>
+      <div class="rc-sub" id="rc-adriana-pct">0% do total</div>
+    </div>
+    <div class="resumo-card">
+      <div class="rc-label"><span class="rc-dot" style="background:var(--azul)"></span>Washington pagou</div>
+      <div class="rc-valor" id="rc-washington">R$ 0,00</div>
+      <div class="rc-sub" id="rc-washington-pct">0% do total</div>
+    </div>
+    <div class="resumo-card">
+      <div class="rc-label"><span class="rc-dot" style="background:var(--verde)"></span>Total do período</div>
+      <div class="rc-valor" id="rc-total">R$ 0,00</div>
+      <div class="rc-sub" id="rc-qtd">0 lançamentos</div>
+    </div>
+    <div class="resumo-card">
+      <div class="rc-label"><span class="rc-dot" style="background:var(--laranja)"></span>Maior despesa</div>
+      <div class="rc-valor" id="rc-maior">R$ 0,00</div>
+      <div class="rc-sub" id="rc-maior-nome">—</div>
+    </div>
+  </div>
+
+  <!-- Acerto -->
+  <div class="acerto-card">
+    <div>
+      <div class="ac-label">💰 Acerto do período</div>
+      <div class="ac-valor" id="ac-valor">Sem lançamentos</div>
+    </div>
+    <div style="font-size:2rem;">🤝</div>
+  </div>
+
+  <!-- Gráficos -->
+  <div class="graficos-grid">
+    <div class="grafico-card">
+      <h3>Adriana × Washington</h3>
+      <div class="grafico-wrap"><canvas id="chart-pizza"></canvas></div>
+    </div>
+    <div class="grafico-card">
+      <h3>Por categoria</h3>
+      <div class="grafico-wrap"><canvas id="chart-categoria"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grafico-card" style="margin-bottom:1rem;">
+    <h3>Evolução mensal</h3>
+    <div class="grafico-wrap" style="height:220px;"><canvas id="chart-evolucao"></canvas></div>
+  </div>
+
+  <!-- Tabela -->
+  <div class="tabela-card">
+    <h3>📋 Lançamentos detalhados</h3>
+    <div id="tabela-wrap"></div>
+  </div>
+
+  <p class="footer">Feito com <span>♥</span> para vocês dois</p>
+</div>
+
+<script>
+  var MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  var periodoAtivo = "mensal";
+  var chartPizza = null, chartCategoria = null, chartEvolucao = null;
+
+  // Carrega todos os dados do localStorage
+  function carregarTodos() {
+    var todos = [];
+    for (var k in localStorage) {
+      if (k.startsWith("desp2-") || k.startsWith("despesas-")) {
+        try {
+          var lista = JSON.parse(localStorage.getItem(k) || "[]");
+          todos = todos.concat(lista);
+        } catch(e) {}
+      }
+    }
+    return todos;
+  }
+
+  function fmt(v) {
+    return "R$ " + Number(v || 0).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function pct(v, total) {
+    if (!total) return "0%";
+    return Math.round(v / total * 100) + "%";
+  }
+
+  // Inicializa selects de ano e mês
+  function inicializarFiltros() {
+    var todos = carregarTodos();
+    var anos = new Set();
+    var agora = new Date();
+    anos.add(agora.getFullYear());
+    todos.forEach(function(d) {
+      if (d.mes) {
+        var partes = d.mes.split(" ");
+        if (partes[1]) anos.add(parseInt(partes[1]));
+      }
+    });
+
+    var selAno = document.getElementById("sel-ano");
+    selAno.innerHTML = "";
+    Array.from(anos).sort().reverse().forEach(function(ano) {
+      var opt = document.createElement("option");
+      opt.value = ano; opt.textContent = ano;
+      if (ano === agora.getFullYear()) opt.selected = true;
+      selAno.appendChild(opt);
+    });
+
+    var selMes = document.getElementById("sel-mes");
+    selMes.innerHTML = "";
+    MESES.forEach(function(m, i) {
+      var opt = document.createElement("option");
+      opt.value = m; opt.textContent = m;
+      if (i === agora.getMonth()) opt.selected = true;
+      selMes.appendChild(opt);
+    });
+  }
+
+  function mudarPeriodo(p) {
+    periodoAtivo = p;
+    document.getElementById("btn-mensal").className    = "filtro-btn" + (p==="mensal"     ? " ativo" : "");
+    document.getElementById("btn-acumulado").className = "filtro-btn" + (p==="acumulado"  ? " ativo" : "");
+    document.getElementById("btn-ano").className       = "filtro-btn" + (p==="ano"        ? " ativo" : "");
+    document.getElementById("sel-mes").style.display  = p==="mensal" ? "inline-block" : "none";
+    aplicarFiltro();
+  }
+
+  function filtrarDados() {
+    var todos = carregarTodos();
+    var ano = parseInt(document.getElementById("sel-ano").value);
+    var mes = document.getElementById("sel-mes").value;
+
+    return todos.filter(function(d) {
+      if (!d.mes) return false;
+      var partes = d.mes.split(" ");
+      var dAno = parseInt(partes[1]);
+      var dMes = partes[0];
+      if (periodoAtivo === "mensal") return dAno === ano && dMes === mes;
+      if (periodoAtivo === "acumulado") {
+        var idxMes = MESES.indexOf(mes);
+        var idxDMes = MESES.indexOf(dMes);
+        return dAno === ano && idxDMes <= idxMes;
+      }
+      if (periodoAtivo === "ano") return dAno === ano;
+      return true;
+    });
+  }
+
+  function aplicarFiltro() {
+    var dados = filtrarDados();
+    atualizarCards(dados);
+    atualizarGraficos(dados);
+    atualizarTabela(dados);
+  }
+
+  function atualizarCards(dados) {
+    var adriana = 0, washington = 0, maior = 0, maiorNome = "—";
+    dados.forEach(function(d) {
+      var v = parseFloat(d.valor) || 0;
+      if (d.responsavel === "Adriana") adriana += v;
+      else if (d.responsavel === "Washington") washington += v;
+      else { adriana += v/2; washington += v/2; }
+      if (v > maior) { maior = v; maiorNome = d.nome; }
+    });
+    var total = adriana + washington;
+    var diff = adriana - total/2;
+
+    document.getElementById("rc-adriana").textContent = fmt(adriana);
+    document.getElementById("rc-washington").textContent = fmt(washington);
+    document.getElementById("rc-total").textContent = fmt(total);
+    document.getElementById("rc-qtd").textContent = dados.length + " lançamento" + (dados.length !== 1 ? "s" : "");
+    document.getElementById("rc-maior").textContent = fmt(maior);
+    document.getElementById("rc-maior-nome").textContent = maiorNome;
+    document.getElementById("rc-adriana-pct").textContent = pct(adriana, total) + " do total";
+    document.getElementById("rc-washington-pct").textContent = pct(washington, total) + " do total";
+
+    var ac = document.getElementById("ac-valor");
+    if (dados.length === 0) ac.textContent = "Sem lançamentos no período";
+    else if (Math.abs(diff) < 0.01) ac.textContent = "✅ Estão quites!";
+    else if (diff > 0) ac.textContent = "Washington deve " + fmt(diff) + " para Adriana";
+    else ac.textContent = "Adriana deve " + fmt(Math.abs(diff)) + " para Washington";
+  }
+
+  function atualizarGraficos(dados) {
+    var adriana = 0, washington = 0;
+    var cats = { fixa: 0, parcela: 0, extra: 0 };
+    dados.forEach(function(d) {
+      var v = parseFloat(d.valor) || 0;
+      if (d.responsavel === "Adriana") adriana += v;
+      else if (d.responsavel === "Washington") washington += v;
+      else { adriana += v/2; washington += v/2; }
+      if (d.tipo === "fixa") cats.fixa += v;
+      else if (d.tipo === "parcela") cats.parcela += v;
+      else cats.extra += v;
+    });
+
+    // Pizza
+    if (chartPizza) chartPizza.destroy();
+    chartPizza = new Chart(document.getElementById("chart-pizza"), {
+      type: "doughnut",
+      data: {
+        labels: ["Adriana", "Washington"],
+        datasets: [{ data: [adriana, washington], backgroundColor: ["#ec4899", "#3b82f6"], borderWidth: 0, hoverOffset: 6 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom", labels: { font: { family: "Nunito", weight: "700" }, padding: 12 } } } }
+    });
+
+    // Barras por categoria
+    if (chartCategoria) chartCategoria.destroy();
+    chartCategoria = new Chart(document.getElementById("chart-categoria"), {
+      type: "bar",
+      data: {
+        labels: ["Fixas", "Parcelas", "Extras"],
+        datasets: [{ data: [cats.fixa, cats.parcela, cats.extra], backgroundColor: ["#10b981", "#f59e0b", "#a855f7"], borderRadius: 8, borderSkipped: false }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { ticks: { callback: function(v) { return "R$" + v.toLocaleString("pt-BR"); } }, grid: { color: "#f3f4f6" } }, x: { grid: { display: false } } }
+      }
+    });
+
+    // Evolução mensal
+    var todos = carregarTodos();
+    var ano = parseInt(document.getElementById("sel-ano").value);
+    var mesesData = MESES.map(function(m) {
+      var soma = 0;
+      todos.filter(function(d) {
+        return d.mes === m + " " + ano;
+      }).forEach(function(d) { soma += parseFloat(d.valor) || 0; });
+      return soma;
+    });
+
+    if (chartEvolucao) chartEvolucao.destroy();
+    chartEvolucao = new Chart(document.getElementById("chart-evolucao"), {
+      type: "line",
+      data: {
+        labels: MESES.map(function(m) { return m.substring(0,3); }),
+        datasets: [{
+          label: "Total mensal",
+          data: mesesData,
+          borderColor: "#a855f7",
+          backgroundColor: "rgba(168,85,247,0.08)",
+          borderWidth: 2.5,
+          pointBackgroundColor: "#a855f7",
+          pointRadius: 4,
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { ticks: { callback: function(v) { return "R$" + v.toLocaleString("pt-BR"); } }, grid: { color: "#f3f4f6" } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  function atualizarTabela(dados) {
+    var wrap = document.getElementById("tabela-wrap");
+    if (dados.length === 0) {
+      wrap.innerHTML = '<div class="vazio">Nenhum lançamento no período selecionado 💸</div>';
+      return;
+    }
+    var sorted = dados.slice().sort(function(a, b) { return (parseFloat(b.valor)||0) - (parseFloat(a.valor)||0); });
+    var html = '<table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Responsável</th><th style="text-align:right">Valor</th></tr></thead><tbody>';
+    sorted.forEach(function(d) {
+      var tc = d.tipo === "fixa" ? "tag-fixa" : d.tipo === "parcela" ? "tag-parcela" : "tag-extra";
+      var tl = d.tipo === "fixa" ? "Fixa" : d.tipo === "parcela" ? "Parcela" : "Extra";
+      var rc = d.responsavel === "Adriana" ? "tag-adriana" : d.responsavel === "Washington" ? "tag-washington" : "tag-ambos";
+      var det = d.parcela ? d.nome + " (" + d.parcela + ")" : d.nome;
+      html += '<tr>';
+      html += '<td style="color:var(--muted);white-space:nowrap">' + (d.data || d.mes || "—") + '</td>';
+      html += '<td>' + det + '</td>';
+      html += '<td><span class="tag ' + tc + '">' + tl + '</span></td>';
+      html += '<td><span class="tag ' + rc + '">' + d.responsavel + '</span></td>';
+      html += '<td class="td-valor">' + fmt(d.valor) + '</td>';
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
+  }
+
+
+
+  // Importar dados históricos Jan-Abr 2026
+  (function() {
+    var historico = {"desp2-Janeiro 2026":[{"nome":"Aluguel","valor":862.57,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Garagem","valor":500.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Sky","valor":327.27,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Netflix","valor":59.9,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Luz","valor":339.9,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Condomínio","valor":235.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Clube","valor":220.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Casa Ctz","valor":610.0,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Disney/Prime","valor":60.0,"responsavel":"Ambos","tipo":"fixa","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Net Muriaé","valor":109.99,"responsavel":"Ambos","tipo":"fixa","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Conecta","valor":100.0,"responsavel":"Ambos","tipo":"fixa","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Net Cataguases","valor":155.99,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Café","valor":190.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Diversos","valor":968.0,"responsavel":"Adriana","tipo":"extra","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"},{"nome":"Diversos","valor":979.72,"responsavel":"Washington","tipo":"extra","parcela":"","data":"01/01/2026","mes":"Janeiro 2026"}],"desp2-Fevereiro 2026":[{"nome":"Aluguel","valor":862.57,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Garagem","valor":127.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Sky","valor":327.27,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Netflix","valor":59.9,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Luz","valor":300.09,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Casa Muriaé","valor":150.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Condomínio","valor":235.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Clube","valor":220.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Casa Ctz","valor":610.0,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Disney/Prime","valor":60.0,"responsavel":"Ambos","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Net Muriaé","valor":109.99,"responsavel":"Ambos","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Conecta","valor":100.0,"responsavel":"Ambos","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Net Cataguases","valor":155.99,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Café","valor":190.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Máquina","valor":373.0,"responsavel":"Ambos","tipo":"parcela","parcela":"fev/26","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Diversos","valor":250.0,"responsavel":"Adriana","tipo":"extra","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Diversos","valor":1286.72,"responsavel":"Washington","tipo":"extra","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Escola","valor":300.0,"responsavel":"Washington","tipo":"extra","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"},{"nome":"Alef","valor":380.0,"responsavel":"Washington","tipo":"extra","parcela":"","data":"01/02/2026","mes":"Fevereiro 2026"}],"desp2-Março 2026":[{"nome":"Aluguel","valor":862.57,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Garagem","valor":570.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Sky","valor":339.13,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Netflix","valor":59.9,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Luz","valor":289.61,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Casa Muriaé","valor":150.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Condomínio","valor":254.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Clube","valor":220.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Casa Ctz","valor":610.0,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Disney/Prime","valor":60.0,"responsavel":"Ambos","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Net Muriaé","valor":109.99,"responsavel":"Ambos","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Conecta","valor":150.0,"responsavel":"Ambos","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Net Cataguases","valor":162.0,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Café","valor":190.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Carro","valor":373.0,"responsavel":"Washington","tipo":"parcela","parcela":"mar/26","data":"01/03/2026","mes":"Março 2026"},{"nome":"Pernambucanas","valor":157.63,"responsavel":"Adriana","tipo":"parcela","parcela":"mar/26","data":"01/03/2026","mes":"Março 2026"},{"nome":"Diversos","valor":407.63,"responsavel":"Adriana","tipo":"extra","parcela":"","data":"01/03/2026","mes":"Março 2026"},{"nome":"Diversos","valor":3036.78,"responsavel":"Washington","tipo":"extra","parcela":"","data":"01/03/2026","mes":"Março 2026"}],"desp2-Abril 2026":[{"nome":"Aluguel","valor":862.57,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Garagem","valor":570.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Sky","valor":339.13,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Netflix","valor":59.9,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Luz","valor":252.06,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Casa Muriaé","valor":150.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Condomínio","valor":249.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Clube","valor":220.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Casa Ctz","valor":610.0,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Disney/Prime","valor":60.0,"responsavel":"Ambos","tipo":"fixa","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Net Muriaé","valor":109.99,"responsavel":"Ambos","tipo":"fixa","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Net Cataguases","valor":162.0,"responsavel":"Adriana","tipo":"fixa","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Café","valor":190.0,"responsavel":"Washington","tipo":"fixa","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Carro","valor":373.0,"responsavel":"Washington","tipo":"parcela","parcela":"abr/26","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Pernambucanas","valor":157.63,"responsavel":"Adriana","tipo":"parcela","parcela":"abr/26","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Diversos","valor":407.63,"responsavel":"Adriana","tipo":"extra","parcela":"","data":"01/04/2026","mes":"Abril 2026"},{"nome":"Diversos","valor":2050.93,"responsavel":"Washington","tipo":"extra","parcela":"","data":"01/04/2026","mes":"Abril 2026"}]};
+    for (var chave in historico) {
+      localStorage.setItem(chave, JSON.stringify(historico[chave]));
+    }
+  })();
+
+  // Init
+  inicializarFiltros();
+  mudarPeriodo("mensal");
+</script>
+</body>
+</html>
