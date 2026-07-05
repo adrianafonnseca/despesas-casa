@@ -15,6 +15,10 @@
     .header p { font-size: 0.95rem; color: #6b7280; }
     .card { background: #fff; border-radius: 24px; padding: 1.75rem; box-shadow: 0 8px 32px rgba(59,130,246,.10); margin-bottom: 1.5rem; }
     .card-title { font-size: 1rem; font-weight: 800; color: #1f2937; margin-bottom: 1.25rem; }
+    .btn-foto { width: 100%; padding: 0.85rem; border: 2px dashed #a855f7; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; background: #f9f5ff; color: #7c3aed; text-align: center; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-foto:hover { background: #f3e8ff; }
+    .preview-foto { width: 100%; border-radius: 12px; margin-bottom: 1rem; display: none; max-height: 200px; object-fit: cover; }
+    .lendo-ia { text-align: center; padding: 1rem; background: #f3e8ff; border-radius: 12px; margin-bottom: 1rem; display: none; color: #7c3aed; font-weight: 700; font-size: 0.95rem; }
     .tabs { display: flex; gap: 8px; margin-bottom: 1.25rem; }
     .tab { flex: 1; padding: 0.6rem 0.4rem; border: 2px solid #e5e7eb; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 700; cursor: pointer; background: #f9fafb; color: #6b7280; text-align: center; }
     .tab.ativo { border-color: #a855f7; background: #f3e8ff; color: #7c3aed; }
@@ -22,9 +26,13 @@
     .field label { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; font-weight: 700; color: #6b7280; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.4rem; }
     .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .dot-blue { background: #3b82f6; } .dot-pink { background: #ec4899; } .dot-purple { background: #a855f7; } .dot-orange { background: #f59e0b; }
-    .field select, .field input { width: 100%; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 0.65rem 1rem; font-family: 'Nunito', sans-serif; font-size: 1rem; color: #1f2937; background: #f9fafb; outline: none; }
+    .field select, .field input { width: 100%; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 0.65rem 1rem; font-family: 'Nunito', sans-serif; font-size: 1rem; color: #1f2937; background: #f9fafb; outline: none; transition: border-color 0.15s; }
+    .field select:focus, .field input:focus { border-color: #a855f7; box-shadow: 0 0 0 3px rgba(168,85,247,.15); background: #fff; }
+    .field input.preenchido { border-color: #10b981; background: #f0fdf4; }
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .btn-enviar { width: 100%; padding: 0.9rem; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 800; cursor: pointer; color: #fff; margin-top: 0.25rem; background: linear-gradient(135deg, #3b82f6 0%, #a855f7 50%, #ec4899 100%); }
+    .btn-enviar { width: 100%; padding: 0.9rem; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 800; cursor: pointer; color: #fff; margin-top: 0.25rem; background: linear-gradient(135deg, #3b82f6 0%, #a855f7 50%, #ec4899 100%); transition: opacity 0.15s; }
+    .btn-enviar:hover { opacity: 0.9; }
+    .btn-enviar:disabled { opacity: 0.6; cursor: not-allowed; }
     .msg { margin-top: 0.85rem; padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.92rem; font-weight: 600; text-align: center; display: none; }
     .msg.success { background: #d1fae5; color: #065f46; display: block; }
     .msg.error { background: #fee2e2; color: #991b1b; display: block; }
@@ -38,6 +46,7 @@
     .saldo-box .label { font-size: 0.8rem; font-weight: 700; color: #7c3aed; text-transform: uppercase; margin-bottom: 4px; }
     .saldo-box .valor { font-size: 1.3rem; font-weight: 800; color: #1f2937; }
     .btn-whats { width: 100%; padding: 0.8rem; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; background: #25d366; color: #fff; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-whats:hover { opacity: 0.9; }
     .lista-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
     .lista-titulo { font-size: 1rem; font-weight: 800; color: #1f2937; }
     .badge { background: linear-gradient(135deg, #3b82f6, #ec4899); color: #fff; font-size: 0.72rem; font-weight: 800; padding: 0.2rem 0.65rem; border-radius: 99px; }
@@ -46,9 +55,7 @@
     .item-info { flex: 1; }
     .item-nome { font-size: 0.97rem; font-weight: 700; color: #1f2937; }
     .item-detalhe { font-size: 0.8rem; color: #6b7280; margin-top: 2px; }
-    .item-direita { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
     .item-valor { font-size: 1rem; font-weight: 800; color: #1f2937; white-space: nowrap; }
-    .btn-del { border: none; background: #fee2e2; color: #991b1b; font-family: 'Nunito', sans-serif; font-size: 0.72rem; font-weight: 700; padding: 4px 12px; border-radius: 99px; cursor: pointer; }
     .item-resp { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin-top: 3px; display: inline-block; }
     .resp-adriana { background: #fce7f3; color: #db2777; } .resp-washington { background: #eff6ff; color: #2563eb; } .resp-ambos { background: #f3e8ff; color: #7c3aed; }
     .tipo-tag { font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; margin-left: 6px; }
@@ -56,6 +63,7 @@
     .lista-vazia { text-align: center; color: #9ca3af; font-size: 0.95rem; padding: 1.5rem 0; }
     .footer { text-align: center; margin-top: 1.5rem; font-size: 0.82rem; color: #9ca3af; }
     .footer span { color: #ec4899; }
+    #input-foto { display: none; }
   </style>
 </head>
 <body>
@@ -68,11 +76,19 @@
 
   <div class="card">
     <div class="card-title">➕ Lançar despesa</div>
+
+    <!-- Botão de foto -->
+    <label class="btn-foto" for="input-foto">📸 Ler nota fiscal ou fatura</label>
+    <input type="file" id="input-foto" accept="image/*" capture="environment" onchange="lerNota(event)" />
+    <img id="preview-foto" class="preview-foto" />
+    <div class="lendo-ia" id="lendo-ia">🤖 Analisando a imagem com IA… aguarde</div>
+
     <div class="tabs">
       <div class="tab ativo" id="tab-fixa" onclick="trocarTipo('fixa')">📌 Fixa</div>
       <div class="tab" id="tab-parcela" onclick="trocarTipo('parcela')">🔄 Parcela</div>
       <div class="tab" id="tab-extra" onclick="trocarTipo('extra')">⚡ Extra</div>
     </div>
+
     <div id="form-fixa">
       <div class="field">
         <label><span class="dot dot-blue"></span>Despesa</label>
@@ -97,6 +113,7 @@
         <input type="number" id="fixa-valor" placeholder="0,00" step="0.01" />
       </div>
     </div>
+
     <div id="form-parcela" style="display:none">
       <div class="field">
         <label><span class="dot dot-orange"></span>Compra parcelada</label>
@@ -124,6 +141,7 @@
         </div>
       </div>
     </div>
+
     <div id="form-extra" style="display:none">
       <div class="field">
         <label><span class="dot dot-purple"></span>Descrição</label>
@@ -144,7 +162,8 @@
         </div>
       </div>
     </div>
-    <button class="btn-enviar" onclick="enviar()">✨ Lançar despesa</button>
+
+    <button class="btn-enviar" id="btn-enviar" onclick="enviar()">✨ Lançar despesa</button>
     <div class="msg" id="msg"></div>
   </div>
 
@@ -174,6 +193,24 @@
 
 <script>
   var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeSFJPqmBBWJ5TdBqMHddjfsMUXsBryeHlXbSrZ5m3G3s5URNBKxPRePxw1A3wmVEbaw/exec";
+  var API_KEY = "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";
+
+  var FORNECEDORES = {
+    "sky": { tipo: "fixa", valor: "Sky|Adriana" },
+    "netflix": { tipo: "fixa", valor: "Netflix|Adriana" },
+    "energisa": { tipo: "fixa", valor: "Luz|Washington" },
+    "cemig": { tipo: "fixa", valor: "Luz|Washington" },
+    "light": { tipo: "fixa", valor: "Luz|Washington" },
+    "condominio": { tipo: "fixa", valor: "Condomínio|Washington" },
+    "pernambucanas": { tipo: "parcela", valor: "Pernambucanas|Adriana" },
+    "disney": { tipo: "fixa", valor: "Disney/Prime|Adriana" },
+    "prime": { tipo: "fixa", valor: "Disney/Prime|Adriana" },
+    "clube": { tipo: "fixa", valor: "Clube|Washington" },
+    "liquidiz": { tipo: "fixa", valor: "Liquidiz|Washington" },
+    "nespresso": { tipo: "extra", valor: "Nespresso|Ambos" },
+    "giga": { tipo: "fixa", valor: "Giga Fibra|Washington" }
+  };
+
   var MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
   var agora = new Date();
   var mesAtual = MESES[agora.getMonth()] + " " + agora.getFullYear();
@@ -205,8 +242,86 @@
     document.getElementById("campo-parcela-desc").style.display = val.startsWith("Outra") ? "block" : "none";
   }
 
+  async function lerNota(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    var preview = document.getElementById("preview-foto");
+    var lendo = document.getElementById("lendo-ia");
+    var reader = new FileReader();
+    reader.onload = async function(e) {
+      preview.src = e.target.result;
+      preview.style.display = "block";
+      lendo.style.display = "block";
+      lendo.style.background = "#f3e8ff";
+      lendo.style.color = "#7c3aed";
+      lendo.textContent = "🤖 Analisando a imagem com IA… aguarde";
+      var base64 = e.target.result.split(",")[1];
+      var mediaType = file.type;
+      try {
+        var response = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": API_KEY,
+            "anthropic-version": "2023-06-01",
+            "anthropic-dangerous-direct-browser-access": "true"
+          },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-6",
+            max_tokens: 500,
+            messages: [{
+              role: "user",
+              content: [
+                { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+                { type: "text", text: 'Analise esta nota fiscal ou fatura e extraia as informações. Responda APENAS em JSON, sem texto adicional, no formato:\n{\n  "fornecedor": "nome do fornecedor ou estabelecimento",\n  "valor": 0.00\n}\nO valor deve ser número sem R$ ou vírgula (use ponto decimal).' }
+              ]
+            }]
+          })
+        });
+        var data = await response.json();
+        var texto = data.content[0].text.replace(/```json|```/g, "").trim();
+        var resultado = JSON.parse(texto);
+        lendo.style.display = "none";
+        preencherCampos(resultado);
+      } catch(err) {
+        lendo.textContent = "❌ Não foi possível ler a imagem. Preencha manualmente.";
+        lendo.style.background = "#fee2e2";
+        lendo.style.color = "#991b1b";
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function preencherCampos(resultado) {
+    var fornecedor = (resultado.fornecedor || "").toLowerCase();
+    var valor = resultado.valor;
+    var tipoEncontrado = null;
+    var chaveEncontrada = null;
+    for (var chave in FORNECEDORES) {
+      if (fornecedor.includes(chave)) {
+        tipoEncontrado = FORNECEDORES[chave].tipo;
+        chaveEncontrada = FORNECEDORES[chave].valor;
+        break;
+      }
+    }
+    if (tipoEncontrado === "fixa") {
+      trocarTipo("fixa");
+      document.getElementById("fixa-nome").value = chaveEncontrada;
+      if (valor) { var i = document.getElementById("fixa-valor"); i.value = valor; i.classList.add("preenchido"); }
+    } else if (tipoEncontrado === "parcela") {
+      trocarTipo("parcela");
+      document.getElementById("parcela-nome").value = chaveEncontrada;
+      if (valor) { var i2 = document.getElementById("parcela-valor"); i2.value = valor; i2.classList.add("preenchido"); }
+    } else {
+      trocarTipo("extra");
+      var d = document.getElementById("extra-desc"); d.value = resultado.fornecedor || ""; d.classList.add("preenchido");
+      if (valor) { var i3 = document.getElementById("extra-valor"); i3.value = valor; i3.classList.add("preenchido"); }
+    }
+    mostrarMsg("✅ IA preencheu os campos! Confirme e lance.", "success");
+  }
+
   function fmt(v) {
-    return "R$ " + Number(v).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
+    return "R$ " + Number(v || 0).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
   }
 
   function calcularResumo(lista) {
@@ -248,39 +363,17 @@
       html += '<div class="item-info"><div class="item-nome">' + d.nome + '<span class="tipo-tag ' + tc + '">' + tl + '</span></div>';
       html += '<div class="item-detalhe">' + det + '</div>';
       html += '<span class="item-resp ' + rc + '">' + d.responsavel + '</span></div>';
-      html += '<div class="item-direita"><div class="item-valor">' + fmt(d.valor) + '</div>';
-      html += '<button class="btn-del" data-i="' + i + '">🗑️ Excluir</button>';
-      html += '</div></div>';
+      html += '<div class="item-valor">' + fmt(d.valor) + '</div>';
+      html += '</div>';
     }
     container.innerHTML = html;
-
-    // Adiciona eventos nos botões excluir
-    var botoes = container.querySelectorAll(".btn-del");
-    for (var b = 0; b < botoes.length; b++) {
-      botoes[b].addEventListener("click", function() {
-        var idx = parseInt(this.getAttribute("data-i"));
-        var lista2 = carregarDespesas();
-        if (idx < 0 || idx >= lista2.length) return;
-        var item = lista2[idx];
-        if (!confirm('Excluir "' + item.nome + '" - ' + fmt(item.valor) + '?')) return;
-        lista2.splice(idx, 1);
-        salvarDespesas(lista2);
-        renderizar();
-        mostrarMsg("🗑️ Despesa excluída!", "success");
-        fetch(SCRIPT_URL, {
-          method: "POST", mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ acao: "excluir", nome: item.nome, valor: item.valor, responsavel: item.responsavel, mes: item.mes })
-        }).catch(function(){});
-      });
-    }
   }
 
   function mostrarMsg(texto, tipo) {
     var msg = document.getElementById("msg");
     msg.textContent = texto;
     msg.className = "msg " + tipo;
-    setTimeout(function() { msg.className = "msg"; }, 3000);
+    setTimeout(function() { msg.className = "msg"; }, 4000);
   }
 
   function enviarWhatsApp() {
@@ -305,7 +398,8 @@
     window.open("https://wa.me/?text=" + encodeURIComponent(texto), "_blank");
   }
 
-  function enviar() {
+  async function enviar() {
+    var btn = document.getElementById("btn-enviar");
     var nome, valor, responsavel, parcela = "", tipo = tipoAtivo;
     if (tipoAtivo === "fixa") {
       var sel = document.getElementById("fixa-nome").value;
@@ -329,6 +423,7 @@
       if (!valor) { mostrarMsg("Informe o valor.", "error"); return; }
     }
 
+    btn.disabled = true; btn.textContent = "Enviando…";
     var data = new Date().toLocaleDateString("pt-BR");
     var registro = { nome: nome, valor: parseFloat(valor), responsavel: responsavel, parcela: parcela, tipo: tipo, data: data, mes: mesAtual };
     var lista = carregarDespesas();
@@ -345,12 +440,18 @@
     document.getElementById("parcela-desc").value = "";
     document.getElementById("extra-desc").value = "";
     document.getElementById("extra-valor").value = "";
+    document.getElementById("preview-foto").style.display = "none";
+    document.getElementById("lendo-ia").style.display = "none";
+    document.getElementById("input-foto").value = "";
+    document.querySelectorAll(".preenchido").forEach(function(el) { el.classList.remove("preenchido"); });
 
     fetch(SCRIPT_URL, {
       method: "POST", mode: "no-cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(registro)
-    }).catch(function(){});
+    }).catch(function(){}).finally(function() {
+      btn.disabled = false; btn.textContent = "✨ Lançar despesa";
+    });
   }
 
   renderizar();
