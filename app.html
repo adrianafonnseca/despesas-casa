@@ -284,9 +284,11 @@
         lendo.style.display = "none";
         preencherCampos(resultado);
       } catch(err) {
-        lendo.textContent = "❌ Não foi possível ler a imagem. Preencha manualmente.";
+        console.error("Erro IA:", err);
+        lendo.textContent = "❌ Erro: " + (err.message || "Não foi possível ler a imagem.");
         lendo.style.background = "#fee2e2";
         lendo.style.color = "#991b1b";
+        lendo.style.display = "block";
       }
     };
     reader.readAsDataURL(file);
