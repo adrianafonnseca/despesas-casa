@@ -242,59 +242,60 @@
     document.getElementById("campo-parcela-desc").style.display = val.startsWith("Outra") ? "block" : "none";
   }
 
-  async function lerNota(event) {
+  function lerNota(event) {
     var file = event.target.files[0];
-    if (!file) return;
+    if (!file) { alert("Nenhum arquivo selecionado."); return; }
+
     var preview = document.getElementById("preview-foto");
     var lendo = document.getElementById("lendo-ia");
 
-    var reader = new FileReader();
-    reader.onload = async function(e) {
-      preview.src = e.target.result;
-      preview.style.display = "block";
-      lendo.style.display = "block";
-      lendo.style.background = "#f3e8ff";
-      lendo.style.color = "#7c3aed";
-      lendo.textContent = "🤖 Analisando a imagem com IA… aguarde";
+    lendo.style.display = "block";
+    lendo.style.background = "#f3e8ff";
+    lendo.style.color = "#7c3aed";
+    lendo.textContent = "⏳ Carregando imagem…";
 
-      var img = new Image();
-      img.onload = async function() {
-        var canvas = document.createElement("canvas");
-        var maxSize = 1600;
-        var ratio = Math.min(maxSize/img.width, maxSize/img.height, 1);
-        canvas.width = img.width * ratio;
-        canvas.height = img.height * ratio;
-        var ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        var base64 = canvas.toDataURL("image/jpeg", 0.92).split(",")[1];
+    var objectURL = URL.createObjectURL(file);
+    preview.src = objectURL;
+    preview.style.display = "block";
 
-        try {
-          // Envia para o Apps Script que chama a API da Anthropic
-          var response = await fetch(SCRIPT_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              acao: "lerImagem",
-              imagemBase64: base64,
-              mediaType: "image/jpeg"
-            })
-          });
-          var texto = await response.text();
-          texto = texto.replace(/```json|```/g, "").trim();
-          var resultado = JSON.parse(texto);
-          lendo.style.display = "none";
-          preencherCampos(resultado);
-        } catch(err) {
-          console.error("Erro IA:", err);
-          lendo.textContent = "Erro: " + (err.message || "Nao foi possivel ler a imagem.");
-          lendo.style.background = "#fee2e2";
-          lendo.style.color = "#991b1b";
-          lendo.style.display = "block";
-        }
-      };
-      img.src = e.target.result;
+    preview.onload = function() {
+      lendo.textContent = "🤖 Analisando com IA… aguarde";
+
+      var canvas = document.createElement("canvas");
+      var maxSize = 1600;
+      var ratio = Math.min(maxSize / preview.naturalWidth, maxSize / preview.naturalHeight, 1);
+      canvas.width = preview.naturalWidth * ratio;
+      canvas.height = preview.naturalHeight * ratio;
+      var ctx = canvas.getContext("2d");
+      ctx.drawImage(preview, 0, 0, canvas.width, canvas.height);
+      var base64 = canvas.toDataURL("image/jpeg", 0.92).split(",")[1];
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ acao: "lerImagem", imagemBase64: base64, mediaType: "image/jpeg" })
+      })
+      .then(function(response) { return response.text(); })
+      .then(function(texto) {
+        texto = texto.replace(/```json|```/g, "").trim();
+        var resultado = JSON.parse(texto);
+        lendo.style.display = "none";
+        preencherCampos(resultado);
+        URL.revokeObjectURL(objectURL);
+      })
+      .catch(function(err) {
+        console.error("Erro IA:", err);
+        lendo.textContent = "❌ Erro: " + (err.message || "Não foi possível ler a imagem.");
+        lendo.style.background = "#fee2e2";
+        lendo.style.color = "#991b1b";
+      });
     };
-    reader.readAsDataURL(file);
+
+    preview.onerror = function() {
+      lendo.textContent = "❌ Erro ao carregar imagem. Tente outra foto.";
+      lendo.style.background = "#fee2e2";
+      lendo.style.color = "#991b1b";
+    };
   }
 
   function preencherCampos  function preencherCampos(resultado) {
@@ -463,4 +464,3 @@
 </script>
 </body>
 </html>
-
