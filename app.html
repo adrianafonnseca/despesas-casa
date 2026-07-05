@@ -269,28 +269,18 @@
         var base64 = canvas.toDataURL("image/jpeg", 0.92).split(",")[1];
 
         try {
-          var response = await fetch("https://api.anthropic.com/v1/messages", {
+          // Envia para o Apps Script que chama a API da Anthropic
+          var response = await fetch(SCRIPT_URL, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-api-key": API_KEY,
-              "anthropic-version": "2023-06-01",
-              "anthropic-dangerous-direct-browser-access": "true"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              model: "claude-sonnet-4-6",
-              max_tokens: 500,
-              messages: [{
-                role: "user",
-                content: [
-                  { type: "image", source: { type: "base64", media_type: "image/jpeg", data: base64 } },
-                  { type: "text", text: 'Analise esta nota fiscal ou fatura e extraia as informações. Responda APENAS em JSON, sem texto adicional, no formato:\n{\n  "fornecedor": "nome do fornecedor ou estabelecimento",\n  "valor": 0.00,\n  "data": "dd/mm/aaaa ou vazio se nao encontrar"\n}\nSeja objetivo. O valor deve ser numero sem R$ ou virgula (use ponto decimal).' }
-                ]
-              }]
+              acao: "lerImagem",
+              imagemBase64: base64,
+              mediaType: "image/jpeg"
             })
           });
-          var data = await response.json();
-          var texto = data.content[0].text.replace(/```json|```/g, "").trim();
+          var texto = await response.text();
+          texto = texto.replace(/```json|```/g, "").trim();
           var resultado = JSON.parse(texto);
           lendo.style.display = "none";
           preencherCampos(resultado);
