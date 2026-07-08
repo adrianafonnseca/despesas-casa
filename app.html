@@ -18,7 +18,7 @@
     .btn-foto { width: 100%; padding: 0.85rem; border: 2px dashed #a855f7; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; background: #f9f5ff; color: #7c3aed; text-align: center; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .btn-foto:hover { background: #f3e8ff; }
     .preview-foto { width: 100%; border-radius: 12px; margin-bottom: 1rem; display: none; max-height: 200px; object-fit: cover; }
-    .lendo-ia { text-align: center; padding: 1rem; background: #f3e8ff; border-radius: 12px; margin-bottom: 1rem; display: none; color: #7c3aed; font-weight: 700; font-size: 0.95rem; }
+    .lendo-ia { text-align: center; padding: 1rem; background: #f3e8ff; border-radius: 12px; margin-bottom: 1rem; display: none; color: #7c3aed; font-weight: 700; font-size: 0.9rem; }
     .tabs { display: flex; gap: 8px; margin-bottom: 1.25rem; }
     .tab { flex: 1; padding: 0.6rem 0.4rem; border: 2px solid #e5e7eb; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 700; cursor: pointer; background: #f9fafb; color: #6b7280; text-align: center; }
     .tab.ativo { border-color: #a855f7; background: #f3e8ff; color: #7c3aed; }
@@ -76,12 +76,10 @@
 
   <div class="card">
     <div class="card-title">➕ Lançar despesa</div>
-
-    <!-- Botão de foto -->
     <label class="btn-foto" for="input-foto">📸 Ler nota fiscal ou fatura</label>
-    <input type="file" id="input-foto" accept="image/*" onchange="lerNota(event)" />
+    <input type="file" id="input-foto" accept="image/*" />
     <img id="preview-foto" class="preview-foto" />
-    <div class="lendo-ia" id="lendo-ia">🤖 Analisando a imagem com IA… aguarde</div>
+    <div class="lendo-ia" id="lendo-ia"></div>
 
     <div class="tabs">
       <div class="tab ativo" id="tab-fixa" onclick="trocarTipo('fixa')">📌 Fixa</div>
@@ -192,288 +190,242 @@
 </div>
 
 <script>
-  var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeSFJPqmBBWJ5TdBqMHddjfsMUXsBryeHlXbSrZ5m3G3s5URNBKxPRePxw1A3wmVEbaw/exec";
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeSFJPqmBBWJ5TdBqMHddjfsMUXsBryeHlXbSrZ5m3G3s5URNBKxPRePxw1A3wmVEbaw/exec";
+var FORNECEDORES = {
+  "sky": { tipo: "fixa", valor: "Sky|Adriana" },
+  "netflix": { tipo: "fixa", valor: "Netflix|Adriana" },
+  "energisa": { tipo: "fixa", valor: "Luz|Washington" },
+  "cemig": { tipo: "fixa", valor: "Luz|Washington" },
+  "light": { tipo: "fixa", valor: "Luz|Washington" },
+  "condominio": { tipo: "fixa", valor: "Condomínio|Washington" },
+  "pernambucanas": { tipo: "parcela", valor: "Pernambucanas|Adriana" },
+  "disney": { tipo: "fixa", valor: "Disney/Prime|Adriana" },
+  "prime": { tipo: "fixa", valor: "Disney/Prime|Adriana" },
+  "clube": { tipo: "fixa", valor: "Clube|Washington" },
+  "liquidiz": { tipo: "fixa", valor: "Liquidiz|Washington" },
+  "nespresso": { tipo: "extra", valor: "Nespresso|Ambos" },
+  "giga": { tipo: "fixa", valor: "Giga Fibra|Washington" }
+};
+var MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+var agora = new Date();
+var mesAtual = MESES[agora.getMonth()] + " " + agora.getFullYear();
+var CHAVE = "desp2-" + mesAtual;
+var tipoAtivo = "fixa";
 
-  var FORNECEDORES = {
-    "sky": { tipo: "fixa", valor: "Sky|Adriana" },
-    "netflix": { tipo: "fixa", valor: "Netflix|Adriana" },
-    "energisa": { tipo: "fixa", valor: "Luz|Washington" },
-    "cemig": { tipo: "fixa", valor: "Luz|Washington" },
-    "light": { tipo: "fixa", valor: "Luz|Washington" },
-    "condominio": { tipo: "fixa", valor: "Condomínio|Washington" },
-    "pernambucanas": { tipo: "parcela", valor: "Pernambucanas|Adriana" },
-    "disney": { tipo: "fixa", valor: "Disney/Prime|Adriana" },
-    "prime": { tipo: "fixa", valor: "Disney/Prime|Adriana" },
-    "clube": { tipo: "fixa", valor: "Clube|Washington" },
-    "liquidiz": { tipo: "fixa", valor: "Liquidiz|Washington" },
-    "nespresso": { tipo: "extra", valor: "Nespresso|Ambos" },
-    "giga": { tipo: "fixa", valor: "Giga Fibra|Washington" }
+document.getElementById("mes-atual").textContent = mesAtual;
+
+// Leitura de foto
+document.getElementById("input-foto").addEventListener("change", function() {
+  var file = this.files[0];
+  if (!file) return;
+  var lendo = document.getElementById("lendo-ia");
+  var preview = document.getElementById("preview-foto");
+  lendo.style.display = "block";
+  lendo.style.background = "#f3e8ff";
+  lendo.style.color = "#7c3aed";
+  lendo.textContent = "⏳ Passo 1: Lendo arquivo…";
+  var reader = new FileReader();
+  reader.onerror = function() {
+    lendo.style.background = "#fee2e2"; lendo.style.color = "#991b1b";
+    lendo.textContent = "❌ Erro ao ler o arquivo.";
   };
-
-  var MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-  var agora = new Date();
-  var mesAtual = MESES[agora.getMonth()] + " " + agora.getFullYear();
-  var CHAVE = "desp2-" + mesAtual;
-  var tipoAtivo = "fixa";
-
-  document.getElementById("mes-atual").textContent = mesAtual;
-
-  function carregarDespesas() {
-    try { return JSON.parse(localStorage.getItem(CHAVE) || "[]"); } catch(e) { return []; }
-  }
-
-  function salvarDespesas(lista) {
-    localStorage.setItem(CHAVE, JSON.stringify(lista));
-  }
-
-  function trocarTipo(tipo) {
-    tipoAtivo = tipo;
-    document.getElementById("tab-fixa").className    = "tab" + (tipo==="fixa"    ? " ativo" : "");
-    document.getElementById("tab-parcela").className = "tab" + (tipo==="parcela" ? " ativo" : "");
-    document.getElementById("tab-extra").className   = "tab" + (tipo==="extra"   ? " ativo" : "");
-    document.getElementById("form-fixa").style.display    = tipo==="fixa"    ? "block" : "none";
-    document.getElementById("form-parcela").style.display = tipo==="parcela" ? "block" : "none";
-    document.getElementById("form-extra").style.display   = tipo==="extra"   ? "block" : "none";
-  }
-
-  function verificarOutraParcela() {
-    var val = document.getElementById("parcela-nome").value;
-    document.getElementById("campo-parcela-desc").style.display = val.startsWith("Outra") ? "block" : "none";
-  }
-
-  function lerNota(event) {
-    var file = event.target.files[0];
-    if (!file) { alert("Nenhum arquivo selecionado."); return; }
-
-    var preview = document.getElementById("preview-foto");
-    var lendo = document.getElementById("lendo-ia");
-
-    lendo.style.display = "block";
-    lendo.style.background = "#f3e8ff";
-    lendo.style.color = "#7c3aed";
-    lendo.textContent = "⏳ Carregando imagem…";
-
-    var reader = new FileReader();
-    reader.onerror = function() {
+  reader.onload = function(e) {
+    lendo.textContent = "⏳ Passo 2: Carregando imagem…";
+    preview.style.display = "block";
+    preview.src = e.target.result;
+    var img = new Image();
+    img.onerror = function() {
+      lendo.style.background = "#fee2e2"; lendo.style.color = "#991b1b";
       lendo.textContent = "❌ Erro ao carregar imagem.";
-      lendo.style.background = "#fee2e2";
-      lendo.style.color = "#991b1b";
     };
-    reader.onload = function(ev) {
-      var dataURL = ev.target.result;
-      preview.src = dataURL;
-      preview.style.display = "block";
-      lendo.textContent = "🤖 Analisando com IA… aguarde";
-
-      var img = new Image();
-      img.onerror = function() {
-        lendo.textContent = "❌ Erro ao processar imagem.";
-        lendo.style.background = "#fee2e2";
-        lendo.style.color = "#991b1b";
+    img.onload = function() {
+      lendo.textContent = "⏳ Passo 3: Preparando envio…";
+      var canvas = document.createElement("canvas");
+      var max = 1000;
+      var r = Math.min(max/img.width, max/img.height, 1);
+      canvas.width = Math.round(img.width * r);
+      canvas.height = Math.round(img.height * r);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      var b64 = canvas.toDataURL("image/jpeg", 0.85).split(",")[1];
+      lendo.textContent = "⏳ Passo 4: Enviando para IA… (aguarde ~20s)";
+      // Usar XMLHttpRequest para evitar CORS
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", SCRIPT_URL, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          lendo.textContent = "⏳ Passo 5: Processando resposta…";
+          try {
+            var txt = xhr.responseText.replace(/```json|```/g, "").trim();
+            var resultado = JSON.parse(txt);
+            lendo.style.display = "none";
+            preencherCampos(resultado);
+          } catch(e) {
+            lendo.style.background = "#fee2e2"; lendo.style.color = "#991b1b";
+            lendo.textContent = "❌ Erro ao processar resposta: " + e.message;
+          }
+        } else {
+          lendo.style.background = "#fee2e2"; lendo.style.color = "#991b1b";
+          lendo.textContent = "❌ Erro HTTP: " + xhr.status;
+        }
       };
-      img.onload = function() {
-        var canvas = document.createElement("canvas");
-        var maxSize = 1600;
-        var w = img.width, h = img.height;
-        var ratio = Math.min(maxSize/w, maxSize/h, 1);
-        canvas.width = Math.round(w * ratio);
-        canvas.height = Math.round(h * ratio);
-        var ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        var base64 = canvas.toDataURL("image/jpeg", 0.90).split(",")[1];
-
-        lendo.textContent = "📡 Enviando para análise…";
-
-        fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ acao: "lerImagem", imagemBase64: base64, mediaType: "image/jpeg" })
-        })
-        .then(function(response) {
-          if (!response.ok) throw new Error("Erro HTTP: " + response.status);
-          return response.text();
-        })
-        .then(function(texto) {
-          texto = texto.replace(/```json|```/g, "").trim();
-          var resultado = JSON.parse(texto);
-          lendo.style.display = "none";
-          preencherCampos(resultado);
-        })
-        .catch(function(err) {
-          console.error("Erro IA:", err);
-          lendo.textContent = "❌ " + (err.message || "Não foi possível ler a imagem.");
-          lendo.style.background = "#fee2e2";
-          lendo.style.color = "#991b1b";
-        });
+      xhr.onerror = function() {
+        lendo.style.background = "#fee2e2"; lendo.style.color = "#991b1b";
+        lendo.textContent = "❌ Erro de rede. Verifique sua conexão.";
       };
-      img.src = dataURL;
+      xhr.send(JSON.stringify({ acao: "lerImagem", imagemBase64: b64, mediaType: "image/jpeg" }));
     };
-    reader.readAsDataURL(file);
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+function preencherCampos(resultado) {
+  var fornecedor = (resultado.fornecedor || "").toLowerCase();
+  var valor = resultado.valor;
+  var tipoEncontrado = null, chaveEncontrada = null;
+  for (var c in FORNECEDORES) {
+    if (fornecedor.includes(c)) { tipoEncontrado = FORNECEDORES[c].tipo; chaveEncontrada = FORNECEDORES[c].valor; break; }
   }
-
-  function preencherCampos  function preencherCampos(resultado) {
-    var fornecedor = (resultado.fornecedor || "").toLowerCase();
-    var valor = resultado.valor;
-    var tipoEncontrado = null;
-    var chaveEncontrada = null;
-    for (var chave in FORNECEDORES) {
-      if (fornecedor.includes(chave)) {
-        tipoEncontrado = FORNECEDORES[chave].tipo;
-        chaveEncontrada = FORNECEDORES[chave].valor;
-        break;
-      }
-    }
-    if (tipoEncontrado === "fixa") {
-      trocarTipo("fixa");
-      document.getElementById("fixa-nome").value = chaveEncontrada;
-      if (valor) { var i = document.getElementById("fixa-valor"); i.value = valor; i.classList.add("preenchido"); }
-    } else if (tipoEncontrado === "parcela") {
-      trocarTipo("parcela");
-      document.getElementById("parcela-nome").value = chaveEncontrada;
-      if (valor) { var i2 = document.getElementById("parcela-valor"); i2.value = valor; i2.classList.add("preenchido"); }
-    } else {
-      trocarTipo("extra");
-      var d = document.getElementById("extra-desc"); d.value = resultado.fornecedor || ""; d.classList.add("preenchido");
-      if (valor) { var i3 = document.getElementById("extra-valor"); i3.value = valor; i3.classList.add("preenchido"); }
-    }
-    mostrarMsg("✅ IA preencheu os campos! Confirme e lance.", "success");
+  if (tipoEncontrado === "fixa") {
+    trocarTipo("fixa");
+    document.getElementById("fixa-nome").value = chaveEncontrada;
+    if (valor) { var i = document.getElementById("fixa-valor"); i.value = valor; i.classList.add("preenchido"); }
+  } else if (tipoEncontrado === "parcela") {
+    trocarTipo("parcela");
+    document.getElementById("parcela-nome").value = chaveEncontrada;
+    if (valor) { var i2 = document.getElementById("parcela-valor"); i2.value = valor; i2.classList.add("preenchido"); }
+  } else {
+    trocarTipo("extra");
+    var d = document.getElementById("extra-desc"); d.value = resultado.fornecedor || ""; d.classList.add("preenchido");
+    if (valor) { var i3 = document.getElementById("extra-valor"); i3.value = valor; i3.classList.add("preenchido"); }
   }
+  mostrarMsg("✅ IA preencheu os campos! Confirme e lance.", "success");
+}
 
-  function fmt(v) {
-    return "R$ " + Number(v || 0).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2});
+function trocarTipo(tipo) {
+  tipoAtivo = tipo;
+  document.getElementById("tab-fixa").className    = "tab" + (tipo==="fixa"    ? " ativo" : "");
+  document.getElementById("tab-parcela").className = "tab" + (tipo==="parcela" ? " ativo" : "");
+  document.getElementById("tab-extra").className   = "tab" + (tipo==="extra"   ? " ativo" : "");
+  document.getElementById("form-fixa").style.display    = tipo==="fixa"    ? "block" : "none";
+  document.getElementById("form-parcela").style.display = tipo==="parcela" ? "block" : "none";
+  document.getElementById("form-extra").style.display   = tipo==="extra"   ? "block" : "none";
+}
+
+function verificarOutraParcela() {
+  var val = document.getElementById("parcela-nome").value;
+  document.getElementById("campo-parcela-desc").style.display = val.startsWith("Outra") ? "block" : "none";
+}
+
+function carregarDespesas() {
+  try { return JSON.parse(localStorage.getItem(CHAVE) || "[]"); } catch(e) { return []; }
+}
+
+function salvarDespesas(lista) { localStorage.setItem(CHAVE, JSON.stringify(lista)); }
+
+function fmt(v) { return "R$ " + Number(v||0).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+function calcularResumo(lista) {
+  var a = 0, w = 0;
+  for (var i = 0; i < lista.length; i++) {
+    var v = parseFloat(lista[i].valor) || 0;
+    if (lista[i].responsavel === "Adriana") a += v;
+    else if (lista[i].responsavel === "Washington") w += v;
+    else { a += v/2; w += v/2; }
   }
+  var t = a + w, d = a - t/2;
+  document.getElementById("total-adriana").textContent = fmt(a);
+  document.getElementById("total-washington").textContent = fmt(w);
+  var s = lista.length === 0 ? "Sem lançamentos ainda" : Math.abs(d) < 0.01 ? "✅ Estão quites!" : d > 0 ? "Washington deve " + fmt(d) + " para Adriana" : "Adriana deve " + fmt(Math.abs(d)) + " para Washington";
+  document.getElementById("saldo-texto").textContent = s;
+}
 
-  function calcularResumo(lista) {
-    var adriana = 0, washington = 0;
-    for (var i = 0; i < lista.length; i++) {
-      var v = parseFloat(lista[i].valor) || 0;
-      if (lista[i].responsavel === "Adriana") adriana += v;
-      else if (lista[i].responsavel === "Washington") washington += v;
-      else { adriana += v/2; washington += v/2; }
-    }
-    var total = adriana + washington;
-    var diff = adriana - total/2;
-    document.getElementById("total-adriana").textContent = fmt(adriana);
-    document.getElementById("total-washington").textContent = fmt(washington);
-    var saldo = lista.length === 0 ? "Sem lançamentos ainda" :
-      Math.abs(diff) < 0.01 ? "✅ Estão quites!" :
-      diff > 0 ? "Washington deve " + fmt(diff) + " para Adriana" :
-      "Adriana deve " + fmt(Math.abs(diff)) + " para Washington";
-    document.getElementById("saldo-texto").textContent = saldo;
+function renderizar() {
+  var lista = carregarDespesas();
+  document.getElementById("badge-count").textContent = lista.length;
+  calcularResumo(lista);
+  var c = document.getElementById("lista-itens");
+  if (lista.length === 0) { c.innerHTML = '<div class="lista-vazia">Nenhuma despesa lançada ainda 💸</div>'; return; }
+  var html = "";
+  for (var i = lista.length - 1; i >= 0; i--) {
+    var d = lista[i];
+    var rc = d.responsavel === "Adriana" ? "resp-adriana" : d.responsavel === "Washington" ? "resp-washington" : "resp-ambos";
+    var tc = d.tipo === "fixa" ? "tipo-fixa" : d.tipo === "parcela" ? "tipo-parcela" : "tipo-extra";
+    var tl = d.tipo === "fixa" ? "Fixa" : d.tipo === "parcela" ? "Parcela" : "Extra";
+    var det = d.parcela ? "Parcela " + d.parcela : d.data;
+    html += '<div class="item"><div class="item-info"><div class="item-nome">' + d.nome + '<span class="tipo-tag ' + tc + '">' + tl + '</span></div><div class="item-detalhe">' + det + '</div><span class="item-resp ' + rc + '">' + d.responsavel + '</span></div><div class="item-valor">' + fmt(d.valor) + '</div></div>';
   }
+  c.innerHTML = html;
+}
 
-  function renderizar() {
-    var lista = carregarDespesas();
-    document.getElementById("badge-count").textContent = lista.length;
-    calcularResumo(lista);
-    var container = document.getElementById("lista-itens");
-    if (lista.length === 0) {
-      container.innerHTML = '<div class="lista-vazia">Nenhuma despesa lançada ainda 💸</div>';
-      return;
-    }
-    var html = "";
-    for (var i = lista.length - 1; i >= 0; i--) {
-      var d = lista[i];
-      var rc = d.responsavel === "Adriana" ? "resp-adriana" : d.responsavel === "Washington" ? "resp-washington" : "resp-ambos";
-      var tc = d.tipo === "fixa" ? "tipo-fixa" : d.tipo === "parcela" ? "tipo-parcela" : "tipo-extra";
-      var tl = d.tipo === "fixa" ? "Fixa" : d.tipo === "parcela" ? "Parcela" : "Extra";
-      var det = d.parcela ? "Parcela " + d.parcela : d.data;
-      html += '<div class="item">';
-      html += '<div class="item-info"><div class="item-nome">' + d.nome + '<span class="tipo-tag ' + tc + '">' + tl + '</span></div>';
-      html += '<div class="item-detalhe">' + det + '</div>';
-      html += '<span class="item-resp ' + rc + '">' + d.responsavel + '</span></div>';
-      html += '<div class="item-valor">' + fmt(d.valor) + '</div>';
-      html += '</div>';
-    }
-    container.innerHTML = html;
+function mostrarMsg(texto, tipo) {
+  var m = document.getElementById("msg"); m.textContent = texto; m.className = "msg " + tipo;
+  setTimeout(function() { m.className = "msg"; }, 4000);
+}
+
+function enviarWhatsApp() {
+  var lista = carregarDespesas();
+  if (!lista.length) { alert("Nenhuma despesa lançada ainda!"); return; }
+  var a = 0, w = 0;
+  for (var i = 0; i < lista.length; i++) {
+    var v = parseFloat(lista[i].valor) || 0;
+    if (lista[i].responsavel === "Adriana") a += v;
+    else if (lista[i].responsavel === "Washington") w += v;
+    else { a += v/2; w += v/2; }
   }
+  var t = a + w, d = a - t/2;
+  var txt = "💰 *Despesas da Casa — " + mesAtual + "*\n\n👩 Adriana pagou: " + fmt(a) + "\n👨 Washington pagou: " + fmt(w) + "\n📦 Total: " + fmt(t) + "\n\n";
+  txt += Math.abs(d) < 0.01 ? "✅ Estão quites!" : d > 0 ? "➡️ Washington deve pagar " + fmt(d) + " para Adriana" : "➡️ Adriana deve pagar " + fmt(Math.abs(d)) + " para Washington";
+  window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
+}
 
-  function mostrarMsg(texto, tipo) {
-    var msg = document.getElementById("msg");
-    msg.textContent = texto;
-    msg.className = "msg " + tipo;
-    setTimeout(function() { msg.className = "msg"; }, 4000);
+function enviar() {
+  var btn = document.getElementById("btn-enviar");
+  var nome, valor, responsavel, parcela = "", tipo = tipoAtivo;
+  if (tipoAtivo === "fixa") {
+    var sel = document.getElementById("fixa-nome").value;
+    if (!sel) { mostrarMsg("Selecione a despesa.", "error"); return; }
+    var p = sel.split("|"); nome = p[0]; responsavel = p[1];
+    valor = document.getElementById("fixa-valor").value;
+    if (!valor) { mostrarMsg("Informe o valor.", "error"); return; }
+  } else if (tipoAtivo === "parcela") {
+    var sel2 = document.getElementById("parcela-nome").value;
+    if (!sel2) { mostrarMsg("Selecione a parcela.", "error"); return; }
+    var p2 = sel2.split("|"); responsavel = p2[1];
+    nome = sel2.startsWith("Outra") ? (document.getElementById("parcela-desc").value || "Parcela") : p2[0];
+    valor = document.getElementById("parcela-valor").value;
+    parcela = document.getElementById("parcela-num").value;
+    if (!valor) { mostrarMsg("Informe o valor.", "error"); return; }
+  } else {
+    nome = document.getElementById("extra-desc").value.trim();
+    valor = document.getElementById("extra-valor").value;
+    responsavel = document.getElementById("extra-resp").value;
+    if (!nome) { mostrarMsg("Informe a descrição.", "error"); return; }
+    if (!valor) { mostrarMsg("Informe o valor.", "error"); return; }
   }
+  btn.disabled = true; btn.textContent = "Enviando…";
+  var data = new Date().toLocaleDateString("pt-BR");
+  var reg = { nome: nome, valor: parseFloat(valor), responsavel: responsavel, parcela: parcela, tipo: tipo, data: data, mes: mesAtual };
+  var lista = carregarDespesas(); lista.push(reg); salvarDespesas(lista); renderizar();
+  mostrarMsg("✅ Despesa lançada!", "success");
+  document.getElementById("fixa-nome").value = "";
+  document.getElementById("fixa-valor").value = "";
+  document.getElementById("parcela-nome").value = "";
+  document.getElementById("parcela-valor").value = "";
+  document.getElementById("parcela-num").value = "";
+  document.getElementById("parcela-desc").value = "";
+  document.getElementById("extra-desc").value = "";
+  document.getElementById("extra-valor").value = "";
+  document.getElementById("preview-foto").style.display = "none";
+  document.getElementById("lendo-ia").style.display = "none";
+  document.getElementById("input-foto").value = "";
+  document.querySelectorAll(".preenchido").forEach(function(el) { el.classList.remove("preenchido"); });
+  fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(reg) }).catch(function(){}).finally(function() { btn.disabled = false; btn.textContent = "✨ Lançar despesa"; });
+}
 
-  function enviarWhatsApp() {
-    var lista = carregarDespesas();
-    if (lista.length === 0) { alert("Nenhuma despesa lançada ainda!"); return; }
-    var adriana = 0, washington = 0;
-    for (var i = 0; i < lista.length; i++) {
-      var v = parseFloat(lista[i].valor) || 0;
-      if (lista[i].responsavel === "Adriana") adriana += v;
-      else if (lista[i].responsavel === "Washington") washington += v;
-      else { adriana += v/2; washington += v/2; }
-    }
-    var total = adriana + washington;
-    var diff = adriana - total/2;
-    var texto = "💰 *Despesas da Casa — " + mesAtual + "*\n\n";
-    texto += "👩 Adriana pagou: " + fmt(adriana) + "\n";
-    texto += "👨 Washington pagou: " + fmt(washington) + "\n";
-    texto += "📦 Total do mês: " + fmt(total) + "\n\n";
-    if (Math.abs(diff) < 0.01) texto += "✅ Estão quites!";
-    else if (diff > 0) texto += "➡️ Washington deve pagar " + fmt(diff) + " para Adriana";
-    else texto += "➡️ Adriana deve pagar " + fmt(Math.abs(diff)) + " para Washington";
-    window.open("https://wa.me/?text=" + encodeURIComponent(texto), "_blank");
-  }
-
-  async function enviar() {
-    var btn = document.getElementById("btn-enviar");
-    var nome, valor, responsavel, parcela = "", tipo = tipoAtivo;
-    if (tipoAtivo === "fixa") {
-      var sel = document.getElementById("fixa-nome").value;
-      if (!sel) { mostrarMsg("Selecione a despesa.", "error"); return; }
-      var p = sel.split("|"); nome = p[0]; responsavel = p[1];
-      valor = document.getElementById("fixa-valor").value;
-      if (!valor) { mostrarMsg("Informe o valor.", "error"); return; }
-    } else if (tipoAtivo === "parcela") {
-      var sel2 = document.getElementById("parcela-nome").value;
-      if (!sel2) { mostrarMsg("Selecione a parcela.", "error"); return; }
-      var p2 = sel2.split("|"); responsavel = p2[1];
-      nome = sel2.startsWith("Outra") ? (document.getElementById("parcela-desc").value || "Parcela") : p2[0];
-      valor = document.getElementById("parcela-valor").value;
-      parcela = document.getElementById("parcela-num").value;
-      if (!valor) { mostrarMsg("Informe o valor.", "error"); return; }
-    } else {
-      nome = document.getElementById("extra-desc").value.trim();
-      valor = document.getElementById("extra-valor").value;
-      responsavel = document.getElementById("extra-resp").value;
-      if (!nome) { mostrarMsg("Informe a descrição.", "error"); return; }
-      if (!valor) { mostrarMsg("Informe o valor.", "error"); return; }
-    }
-
-    btn.disabled = true; btn.textContent = "Enviando…";
-    var data = new Date().toLocaleDateString("pt-BR");
-    var registro = { nome: nome, valor: parseFloat(valor), responsavel: responsavel, parcela: parcela, tipo: tipo, data: data, mes: mesAtual };
-    var lista = carregarDespesas();
-    lista.push(registro);
-    salvarDespesas(lista);
-    renderizar();
-    mostrarMsg("✅ Despesa lançada!", "success");
-
-    document.getElementById("fixa-nome").value = "";
-    document.getElementById("fixa-valor").value = "";
-    document.getElementById("parcela-nome").value = "";
-    document.getElementById("parcela-valor").value = "";
-    document.getElementById("parcela-num").value = "";
-    document.getElementById("parcela-desc").value = "";
-    document.getElementById("extra-desc").value = "";
-    document.getElementById("extra-valor").value = "";
-    document.getElementById("preview-foto").style.display = "none";
-    document.getElementById("lendo-ia").style.display = "none";
-    document.getElementById("input-foto").value = "";
-    document.querySelectorAll(".preenchido").forEach(function(el) { el.classList.remove("preenchido"); });
-
-    fetch(SCRIPT_URL, {
-      method: "POST", mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(registro)
-    }).catch(function(){}).finally(function() {
-      btn.disabled = false; btn.textContent = "✨ Lançar despesa";
-    });
-  }
-
-  renderizar();
+renderizar();
 </script>
 </body>
 </html>
+
