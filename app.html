@@ -15,10 +15,6 @@
     .header p { font-size: 0.95rem; color: #6b7280; }
     .card { background: #fff; border-radius: 24px; padding: 1.75rem; box-shadow: 0 8px 32px rgba(59,130,246,.10); margin-bottom: 1.5rem; }
     .card-title { font-size: 1rem; font-weight: 800; color: #1f2937; margin-bottom: 1.25rem; }
-    .btn-foto { width: 100%; padding: 0.85rem; border: 2px dashed #a855f7; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; background: #f9f5ff; color: #7c3aed; text-align: center; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-foto:hover { background: #f3e8ff; }
-    .preview-foto { width: 100%; border-radius: 12px; margin-bottom: 1rem; display: none; max-height: 200px; object-fit: cover; }
-    .lendo-ia { text-align: center; padding: 1rem; background: #f3e8ff; border-radius: 12px; margin-bottom: 1rem; display: none; color: #7c3aed; font-weight: 700; font-size: 0.9rem; }
     .tabs { display: flex; gap: 8px; margin-bottom: 1.25rem; }
     .tab { flex: 1; padding: 0.6rem 0.4rem; border: 2px solid #e5e7eb; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 700; cursor: pointer; background: #f9fafb; color: #6b7280; text-align: center; }
     .tab.ativo { border-color: #a855f7; background: #f3e8ff; color: #7c3aed; }
@@ -28,7 +24,6 @@
     .dot-blue { background: #3b82f6; } .dot-pink { background: #ec4899; } .dot-purple { background: #a855f7; } .dot-orange { background: #f59e0b; }
     .field select, .field input { width: 100%; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 0.65rem 1rem; font-family: 'Nunito', sans-serif; font-size: 1rem; color: #1f2937; background: #f9fafb; outline: none; transition: border-color 0.15s; }
     .field select:focus, .field input:focus { border-color: #a855f7; box-shadow: 0 0 0 3px rgba(168,85,247,.15); background: #fff; }
-    .field input.preenchido { border-color: #10b981; background: #f0fdf4; }
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .btn-enviar { width: 100%; padding: 0.9rem; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 800; cursor: pointer; color: #fff; margin-top: 0.25rem; background: linear-gradient(135deg, #3b82f6 0%, #a855f7 50%, #ec4899 100%); transition: opacity 0.15s; }
     .btn-enviar:hover { opacity: 0.9; }
@@ -63,7 +58,6 @@
     .lista-vazia { text-align: center; color: #9ca3af; font-size: 0.95rem; padding: 1.5rem 0; }
     .footer { text-align: center; margin-top: 1.5rem; font-size: 0.82rem; color: #9ca3af; }
     .footer span { color: #ec4899; }
-    #input-foto { display: none; }
   </style>
 </head>
 <body>
@@ -76,11 +70,6 @@
 
   <div class="card">
     <div class="card-title">➕ Lançar despesa</div>
-    <label class="btn-foto" for="input-foto">📸 Ler nota fiscal ou fatura</label>
-    <input type="file" id="input-foto" accept="image/*" />
-    <img id="preview-foto" class="preview-foto" />
-    <div class="lendo-ia" id="lendo-ia"></div>
-
     <div class="tabs">
       <div class="tab ativo" id="tab-fixa" onclick="trocarTipo('fixa')">📌 Fixa</div>
       <div class="tab" id="tab-parcela" onclick="trocarTipo('parcela')">🔄 Parcela</div>
@@ -191,21 +180,6 @@
 
 <script>
 var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeSFJPqmBBWJ5TdBqMHddjfsMUXsBryeHlXbSrZ5m3G3s5URNBKxPRePxw1A3wmVEbaw/exec";
-var FORNECEDORES = {
-  "sky": { tipo: "fixa", valor: "Sky|Adriana" },
-  "netflix": { tipo: "fixa", valor: "Netflix|Adriana" },
-  "energisa": { tipo: "fixa", valor: "Luz|Washington" },
-  "cemig": { tipo: "fixa", valor: "Luz|Washington" },
-  "light": { tipo: "fixa", valor: "Luz|Washington" },
-  "condominio": { tipo: "fixa", valor: "Condomínio|Washington" },
-  "pernambucanas": { tipo: "parcela", valor: "Pernambucanas|Adriana" },
-  "disney": { tipo: "fixa", valor: "Disney/Prime|Adriana" },
-  "prime": { tipo: "fixa", valor: "Disney/Prime|Adriana" },
-  "clube": { tipo: "fixa", valor: "Clube|Washington" },
-  "liquidiz": { tipo: "fixa", valor: "Liquidiz|Washington" },
-  "nespresso": { tipo: "extra", valor: "Nespresso|Ambos" },
-  "giga": { tipo: "fixa", valor: "Giga Fibra|Washington" }
-};
 var MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 var agora = new Date();
 var mesAtual = MESES[agora.getMonth()] + " " + agora.getFullYear();
@@ -213,95 +187,6 @@ var CHAVE = "desp2-" + mesAtual;
 var tipoAtivo = "fixa";
 
 document.getElementById("mes-atual").textContent = mesAtual;
-
-// Leitura de foto
-document.getElementById("input-foto").addEventListener("change", function() {
-  var file = this.files[0];
-  if (!file) return;
-  var lendo = document.getElementById("lendo-ia");
-  var preview = document.getElementById("preview-foto");
-  lendo.style.display = "block";
-  lendo.style.background = "#f3e8ff";
-  lendo.style.color = "#7c3aed";
-  lendo.textContent = "⏳ Passo 1: Lendo arquivo…";
-  var reader = new FileReader();
-  reader.onerror = function() {
-    lendo.style.background = "#fee2e2"; lendo.style.color = "#991b1b";
-    lendo.textContent = "❌ Erro ao ler o arquivo.";
-  };
-  reader.onload = function(e) {
-    lendo.textContent = "⏳ Passo 2: Carregando imagem…";
-    preview.style.display = "block";
-    preview.src = e.target.result;
-    var img = new Image();
-    img.onerror = function() {
-      lendo.style.background = "#fee2e2"; lendo.style.color = "#991b1b";
-      lendo.textContent = "❌ Erro ao carregar imagem.";
-    };
-    img.onload = function() {
-      lendo.textContent = "⏳ Passo 3: Preparando envio…";
-      var canvas = document.createElement("canvas");
-      var max = 1000;
-      var r = Math.min(max/img.width, max/img.height, 1);
-      canvas.width = Math.round(img.width * r);
-      canvas.height = Math.round(img.height * r);
-      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-      var b64 = canvas.toDataURL("image/jpeg", 0.85).split(",")[1];
-      lendo.textContent = "⏳ Passo 4: Enviando para IA… (aguarde ~20s)";
-      // Usar XMLHttpRequest para evitar CORS
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", SCRIPT_URL, true);
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.onload = function() {
-        if (xhr.status >= 200 && xhr.status < 300) {
-          lendo.textContent = "⏳ Passo 5: Processando resposta…";
-          try {
-            var txt = xhr.responseText.replace(/```json|```/g, "").trim();
-            var resultado = JSON.parse(txt);
-            lendo.style.display = "none";
-            preencherCampos(resultado);
-          } catch(e) {
-            lendo.style.background = "#fee2e2"; lendo.style.color = "#991b1b";
-            lendo.textContent = "❌ Erro ao processar resposta: " + e.message;
-          }
-        } else {
-          lendo.style.background = "#fee2e2"; lendo.style.color = "#991b1b";
-          lendo.textContent = "❌ Erro HTTP: " + xhr.status;
-        }
-      };
-      xhr.onerror = function() {
-        lendo.style.background = "#fee2e2"; lendo.style.color = "#991b1b";
-        lendo.textContent = "❌ Erro de rede. Verifique sua conexão.";
-      };
-      xhr.send(JSON.stringify({ acao: "lerImagem", imagemBase64: b64, mediaType: "image/jpeg" }));
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-});
-
-function preencherCampos(resultado) {
-  var fornecedor = (resultado.fornecedor || "").toLowerCase();
-  var valor = resultado.valor;
-  var tipoEncontrado = null, chaveEncontrada = null;
-  for (var c in FORNECEDORES) {
-    if (fornecedor.includes(c)) { tipoEncontrado = FORNECEDORES[c].tipo; chaveEncontrada = FORNECEDORES[c].valor; break; }
-  }
-  if (tipoEncontrado === "fixa") {
-    trocarTipo("fixa");
-    document.getElementById("fixa-nome").value = chaveEncontrada;
-    if (valor) { var i = document.getElementById("fixa-valor"); i.value = valor; i.classList.add("preenchido"); }
-  } else if (tipoEncontrado === "parcela") {
-    trocarTipo("parcela");
-    document.getElementById("parcela-nome").value = chaveEncontrada;
-    if (valor) { var i2 = document.getElementById("parcela-valor"); i2.value = valor; i2.classList.add("preenchido"); }
-  } else {
-    trocarTipo("extra");
-    var d = document.getElementById("extra-desc"); d.value = resultado.fornecedor || ""; d.classList.add("preenchido");
-    if (valor) { var i3 = document.getElementById("extra-valor"); i3.value = valor; i3.classList.add("preenchido"); }
-  }
-  mostrarMsg("✅ IA preencheu os campos! Confirme e lance.", "success");
-}
 
 function trocarTipo(tipo) {
   tipoAtivo = tipo;
@@ -417,10 +302,6 @@ function enviar() {
   document.getElementById("parcela-desc").value = "";
   document.getElementById("extra-desc").value = "";
   document.getElementById("extra-valor").value = "";
-  document.getElementById("preview-foto").style.display = "none";
-  document.getElementById("lendo-ia").style.display = "none";
-  document.getElementById("input-foto").value = "";
-  document.querySelectorAll(".preenchido").forEach(function(el) { el.classList.remove("preenchido"); });
   fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(reg) }).catch(function(){}).finally(function() { btn.disabled = false; btn.textContent = "✨ Lançar despesa"; });
 }
 
@@ -428,4 +309,3 @@ renderizar();
 </script>
 </body>
 </html>
-
