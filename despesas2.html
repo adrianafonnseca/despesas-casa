@@ -15,13 +15,10 @@
     .header p { font-size: 0.95rem; color: #6b7280; }
     .card { background: #fff; border-radius: 24px; padding: 1.75rem; box-shadow: 0 8px 32px rgba(59,130,246,.10); margin-bottom: 1.5rem; }
     .card-title { font-size: 1rem; font-weight: 800; color: #1f2937; margin-bottom: 1.25rem; }
-    .tabs { display: flex; gap: 8px; margin-bottom: 1.25rem; }
-    .tab { flex: 1; padding: 0.6rem 0.4rem; border: 2px solid #e5e7eb; border-radius: 12px; font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 700; cursor: pointer; background: #f9fafb; color: #6b7280; text-align: center; }
-    .tab.ativo { border-color: #a855f7; background: #f3e8ff; color: #7c3aed; }
     .field { margin-bottom: 1.1rem; }
     .field label { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; font-weight: 700; color: #6b7280; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.4rem; }
     .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .dot-blue { background: #3b82f6; } .dot-pink { background: #ec4899; } .dot-purple { background: #a855f7; } .dot-orange { background: #f59e0b; }
+    .dot-blue { background: #3b82f6; } .dot-pink { background: #ec4899; } .dot-purple { background: #a855f7; } .dot-orange { background: #f59e0b; } .dot-green { background: #10b981; }
     .field select, .field input { width: 100%; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 0.65rem 1rem; font-family: 'Nunito', sans-serif; font-size: 1rem; color: #1f2937; background: #f9fafb; outline: none; transition: border-color 0.15s; }
     .field select:focus, .field input:focus { border-color: #a855f7; box-shadow: 0 0 0 3px rgba(168,85,247,.15); background: #fff; }
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -58,6 +55,8 @@
     .lista-vazia { text-align: center; color: #9ca3af; font-size: 0.95rem; padding: 1.5rem 0; }
     .footer { text-align: center; margin-top: 1.5rem; font-size: 0.82rem; color: #9ca3af; }
     .footer span { color: #ec4899; }
+    #campo-descricao { display: none; }
+    #campo-parcela { display: none; }
   </style>
 </head>
 <body>
@@ -70,83 +69,61 @@
 
   <div class="card">
     <div class="card-title">➕ Lançar despesa</div>
-    <div class="tabs">
-      <div class="tab ativo" id="tab-fixa" onclick="trocarTipo('fixa')">📌 Fixa</div>
-      <div class="tab" id="tab-parcela" onclick="trocarTipo('parcela')">🔄 Parcela</div>
-      <div class="tab" id="tab-extra" onclick="trocarTipo('extra')">⚡ Extra</div>
+
+    <!-- Categoria -->
+    <div class="field">
+      <label><span class="dot dot-purple"></span>Categoria</label>
+      <select id="categoria" onchange="atualizarFormulario()">
+        <option value="">Selecione…</option>
+        <optgroup label="📌 Fixas">
+          <option value="Aluguel|Washington|fixa">Aluguel</option>
+          <option value="Garagem|Washington|fixa">Garagem</option>
+          <option value="Sky|Adriana|fixa">Sky</option>
+          <option value="Netflix|Adriana|fixa">Netflix</option>
+          <option value="Luz|Washington|fixa">Luz</option>
+          <option value="Condomínio|Washington|fixa">Condomínio</option>
+          <option value="Clube|Washington|fixa">Clube</option>
+          <option value="Casa Muriaé|Washington|fixa">Casa Muriaé</option>
+          <option value="Casa Ctz|Adriana|fixa">Casa Ctz</option>
+          <option value="Café|Washington|fixa">Café</option>
+          <option value="Liquidiz|Washington|fixa">Liquidiz</option>
+          <option value="Disney/Prime|Adriana|fixa">Disney/Prime</option>
+        </optgroup>
+        <optgroup label="🔄 Parcelas">
+          <option value="Pernambucanas|Adriana|parcela">Pernambucanas</option>
+          <option value="Outra parcela|Ambos|parcela">Outra parcela…</option>
+        </optgroup>
+        <optgroup label="⚡ Extras">
+          <option value="Extra|Adriana|extra">Gasto extra…</option>
+        </optgroup>
+      </select>
     </div>
 
-    <div id="form-fixa">
-      <div class="field">
-        <label><span class="dot dot-blue"></span>Despesa</label>
-        <select id="fixa-nome">
-          <option value="">Selecione…</option>
-          <option value="Aluguel|Washington">Aluguel (Washington)</option>
-          <option value="Garagem|Washington">Garagem (Washington)</option>
-          <option value="Sky|Adriana">Sky (Adriana)</option>
-          <option value="Netflix|Adriana">Netflix (Adriana)</option>
-          <option value="Luz|Washington">Luz (Washington)</option>
-          <option value="Condomínio|Washington">Condomínio (Washington)</option>
-          <option value="Clube|Washington">Clube (Washington)</option>
-          <option value="Casa Muriaé|Washington">Casa Muriaé (Washington)</option>
-          <option value="Casa Ctz|Adriana">Casa Ctz (Adriana)</option>
-          <option value="Café|Washington">Café (Washington)</option>
-          <option value="Liquidiz|Washington">Liquidiz (Washington)</option>
-          <option value="Disney/Prime|Adriana">Disney/Prime (Adriana)</option>
-        </select>
-      </div>
+    <!-- Descrição (para extras e parcelas livres) -->
+    <div class="field" id="campo-descricao">
+      <label><span class="dot dot-orange"></span>Descrição</label>
+      <input type="text" id="descricao" placeholder="Descreva o gasto…" />
+    </div>
+
+    <!-- Número da parcela -->
+    <div class="field" id="campo-parcela">
+      <label><span class="dot dot-orange"></span>Número da parcela</label>
+      <input type="text" id="parcela-num" placeholder="Ex: 3/10" />
+    </div>
+
+    <!-- Valor e Quem pagou -->
+    <div class="row2">
       <div class="field">
         <label><span class="dot dot-pink"></span>Valor (R$)</label>
-        <input type="number" id="fixa-valor" placeholder="0,00" step="0.01" />
+        <input type="number" id="valor" placeholder="0,00" step="0.01" />
       </div>
-    </div>
-
-    <div id="form-parcela" style="display:none">
       <div class="field">
-        <label><span class="dot dot-orange"></span>Compra parcelada</label>
-        <select id="parcela-nome" onchange="verificarOutraParcela()">
-          <option value="">Selecione…</option>
-          <option value="Pernambucanas|Adriana">Pernambucanas (Adriana)</option>
-          <option value="Outra|Adriana">Outra — Adriana</option>
-          <option value="Outra|Washington">Outra — Washington</option>
+        <label><span class="dot dot-blue"></span>Quem pagou</label>
+        <select id="responsavel">
+          <option value="Washington">Washington</option>
+          <option value="Adriana">Adriana</option>
+          <option value="Ambos">Ambos</option>
         </select>
-      </div>
-      <div id="campo-parcela-desc" style="display:none">
-        <div class="field">
-          <label><span class="dot dot-blue"></span>Descrição</label>
-          <input type="text" id="parcela-desc" placeholder="Nome da compra…" />
-        </div>
-      </div>
-      <div class="row2">
-        <div class="field">
-          <label><span class="dot dot-pink"></span>Valor (R$)</label>
-          <input type="number" id="parcela-valor" placeholder="0,00" step="0.01" />
-        </div>
-        <div class="field">
-          <label><span class="dot dot-purple"></span>Parcela nº</label>
-          <input type="text" id="parcela-num" placeholder="Ex: 3/10" />
-        </div>
-      </div>
-    </div>
-
-    <div id="form-extra" style="display:none">
-      <div class="field">
-        <label><span class="dot dot-purple"></span>Descrição</label>
-        <input type="text" id="extra-desc" placeholder="Ex: Presente, Remédio, Viagem…" />
-      </div>
-      <div class="row2">
-        <div class="field">
-          <label><span class="dot dot-pink"></span>Valor (R$)</label>
-          <input type="number" id="extra-valor" placeholder="0,00" step="0.01" />
-        </div>
-        <div class="field">
-          <label><span class="dot dot-blue"></span>Quem pagou</label>
-          <select id="extra-resp">
-            <option value="Adriana">Adriana</option>
-            <option value="Washington">Washington</option>
-            <option value="Ambos">Ambos</option>
-          </select>
-        </div>
       </div>
     </div>
 
@@ -184,23 +161,27 @@ var MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agos
 var agora = new Date();
 var mesAtual = MESES[agora.getMonth()] + " " + agora.getFullYear();
 var CHAVE = "desp2-" + mesAtual;
-var tipoAtivo = "fixa";
 
 document.getElementById("mes-atual").textContent = mesAtual;
 
-function trocarTipo(tipo) {
-  tipoAtivo = tipo;
-  document.getElementById("tab-fixa").className    = "tab" + (tipo==="fixa"    ? " ativo" : "");
-  document.getElementById("tab-parcela").className = "tab" + (tipo==="parcela" ? " ativo" : "");
-  document.getElementById("tab-extra").className   = "tab" + (tipo==="extra"   ? " ativo" : "");
-  document.getElementById("form-fixa").style.display    = tipo==="fixa"    ? "block" : "none";
-  document.getElementById("form-parcela").style.display = tipo==="parcela" ? "block" : "none";
-  document.getElementById("form-extra").style.display   = tipo==="extra"   ? "block" : "none";
-}
+function atualizarFormulario() {
+  var sel = document.getElementById("categoria").value;
+  var campDesc = document.getElementById("campo-descricao");
+  var campParc = document.getElementById("campo-parcela");
 
-function verificarOutraParcela() {
-  var val = document.getElementById("parcela-nome").value;
-  document.getElementById("campo-parcela-desc").style.display = val.startsWith("Outra") ? "block" : "none";
+  if (!sel) { campDesc.style.display = "none"; campParc.style.display = "none"; return; }
+
+  var partes = sel.split("|");
+  var tipo = partes[2];
+  var respPadrao = partes[1];
+
+  // Mostrar campo descrição para extras e parcela livre
+  campDesc.style.display = (tipo === "extra" || sel.startsWith("Outra parcela")) ? "block" : "none";
+  // Mostrar campo parcela para parcelas
+  campParc.style.display = tipo === "parcela" ? "block" : "none";
+
+  // Atualizar responsável padrão
+  document.getElementById("responsavel").value = respPadrao || "Washington";
 }
 
 function carregarDespesas() {
@@ -267,41 +248,36 @@ function enviarWhatsApp() {
 
 function enviar() {
   var btn = document.getElementById("btn-enviar");
-  var nome, valor, responsavel, parcela = "", tipo = tipoAtivo;
-  if (tipoAtivo === "fixa") {
-    var sel = document.getElementById("fixa-nome").value;
-    if (!sel) { mostrarMsg("Selecione a despesa.", "error"); return; }
-    var p = sel.split("|"); nome = p[0]; responsavel = p[1];
-    valor = document.getElementById("fixa-valor").value;
-    if (!valor) { mostrarMsg("Informe o valor.", "error"); return; }
-  } else if (tipoAtivo === "parcela") {
-    var sel2 = document.getElementById("parcela-nome").value;
-    if (!sel2) { mostrarMsg("Selecione a parcela.", "error"); return; }
-    var p2 = sel2.split("|"); responsavel = p2[1];
-    nome = sel2.startsWith("Outra") ? (document.getElementById("parcela-desc").value || "Parcela") : p2[0];
-    valor = document.getElementById("parcela-valor").value;
-    parcela = document.getElementById("parcela-num").value;
-    if (!valor) { mostrarMsg("Informe o valor.", "error"); return; }
-  } else {
-    nome = document.getElementById("extra-desc").value.trim();
-    valor = document.getElementById("extra-valor").value;
-    responsavel = document.getElementById("extra-resp").value;
-    if (!nome) { mostrarMsg("Informe a descrição.", "error"); return; }
-    if (!valor) { mostrarMsg("Informe o valor.", "error"); return; }
-  }
+  var sel = document.getElementById("categoria").value;
+  if (!sel) { mostrarMsg("Selecione a categoria.", "error"); return; }
+
+  var partes = sel.split("|");
+  var tipo = partes[2];
+  var nomePadrao = partes[0];
+  var responsavel = document.getElementById("responsavel").value;
+  var valor = document.getElementById("valor").value;
+  var parcela = document.getElementById("parcela-num").value;
+  var descricao = document.getElementById("descricao").value.trim();
+
+  // Nome final
+  var nome = (tipo === "extra" || sel.startsWith("Outra parcela")) ? (descricao || nomePadrao) : nomePadrao;
+
+  if (!valor) { mostrarMsg("Informe o valor.", "error"); return; }
+  if ((tipo === "extra" || sel.startsWith("Outra parcela")) && !descricao) { mostrarMsg("Informe a descrição.", "error"); return; }
+
   btn.disabled = true; btn.textContent = "Enviando…";
   var data = new Date().toLocaleDateString("pt-BR");
   var reg = { nome: nome, valor: parseFloat(valor), responsavel: responsavel, parcela: parcela, tipo: tipo, data: data, mes: mesAtual };
   var lista = carregarDespesas(); lista.push(reg); salvarDespesas(lista); renderizar();
   mostrarMsg("✅ Despesa lançada!", "success");
-  document.getElementById("fixa-nome").value = "";
-  document.getElementById("fixa-valor").value = "";
-  document.getElementById("parcela-nome").value = "";
-  document.getElementById("parcela-valor").value = "";
+
+  document.getElementById("categoria").value = "";
+  document.getElementById("valor").value = "";
+  document.getElementById("descricao").value = "";
   document.getElementById("parcela-num").value = "";
-  document.getElementById("parcela-desc").value = "";
-  document.getElementById("extra-desc").value = "";
-  document.getElementById("extra-valor").value = "";
+  document.getElementById("campo-descricao").style.display = "none";
+  document.getElementById("campo-parcela").style.display = "none";
+
   fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(reg) }).catch(function(){}).finally(function() { btn.disabled = false; btn.textContent = "✨ Lançar despesa"; });
 }
 
