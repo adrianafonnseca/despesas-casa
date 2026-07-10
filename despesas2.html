@@ -14,7 +14,8 @@
     .header h1 { font-size: 1.9rem; font-weight: 800; background: linear-gradient(90deg, #3b82f6, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.3rem; }
     .header p { font-size: 0.95rem; color: #6b7280; }
     .card { background: #fff; border-radius: 24px; padding: 1.75rem; box-shadow: 0 8px 32px rgba(59,130,246,.10); margin-bottom: 1.5rem; }
-    .card-title { font-size: 1rem; font-weight: 800; color: #1f2937; margin-bottom: 1.25rem; }
+    .card-title { font-size: 1rem; font-weight: 800; color: #1f2937; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; }
+    .badge-pend { background: #fef3c7; color: #92400e; font-size: 0.72rem; font-weight: 800; padding: 0.2rem 0.65rem; border-radius: 99px; }
     .field { margin-bottom: 1.1rem; }
     .field label { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; font-weight: 700; color: #6b7280; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.4rem; }
     .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -42,8 +43,9 @@
     .lista-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
     .lista-titulo { font-size: 1rem; font-weight: 800; color: #1f2937; }
     .badge { background: linear-gradient(135deg, #3b82f6, #ec4899); color: #fff; font-size: 0.72rem; font-weight: 800; padding: 0.2rem 0.65rem; border-radius: 99px; }
-    .item { padding: 0.85rem 0; border-bottom: 1px solid #f3f4f6; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .item { padding: 0.85rem 0; border-bottom: 1px solid #f3f4f6; }
     .item:last-child { border-bottom: none; }
+    .item-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
     .item-info { flex: 1; }
     .item-nome { font-size: 0.97rem; font-weight: 700; color: #1f2937; }
     .item-detalhe { font-size: 0.8rem; color: #6b7280; margin-top: 2px; }
@@ -53,6 +55,22 @@
     .tipo-tag { font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; margin-left: 6px; }
     .tipo-fixa { background: #d1fae5; color: #065f46; } .tipo-parcela { background: #fef3c7; color: #92400e; } .tipo-extra { background: #ede9fe; color: #5b21b6; }
     .lista-vazia { text-align: center; color: #9ca3af; font-size: 0.95rem; padding: 1.5rem 0; }
+
+    /* Faturas pendentes */
+    .fatura-item { padding: 0.85rem; border: 1.5px solid #fef3c7; border-radius: 14px; background: #fffbeb; margin-bottom: 0.75rem; }
+    .fatura-nome { font-size: 0.97rem; font-weight: 800; color: #1f2937; margin-bottom: 2px; }
+    .fatura-detalhe { font-size: 0.8rem; color: #6b7280; margin-bottom: 0.75rem; }
+    .fatura-valor { font-size: 1.1rem; font-weight: 900; color: #92400e; }
+    .fatura-acoes { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-top: 0.75rem; }
+    .btn-acao { border: none; border-radius: 10px; padding: 0.5rem 0.25rem; font-family: 'Nunito', sans-serif; font-size: 0.72rem; font-weight: 800; cursor: pointer; transition: opacity 0.15s; }
+    .btn-acao:hover { opacity: 0.85; }
+    .btn-adriana { background: #fce7f3; color: #db2777; }
+    .btn-washington { background: #eff6ff; color: #2563eb; }
+    .btn-ambos { background: #f3e8ff; color: #7c3aed; }
+    .btn-desconsiderar { background: #f3f4f6; color: #6b7280; }
+    .btn-atualizar { border: none; background: #f3e8ff; color: #7c3aed; font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 700; padding: 0.5rem 1rem; border-radius: 99px; cursor: pointer; }
+    .carregando { text-align: center; color: #9ca3af; font-size: 0.9rem; padding: 1rem 0; }
+
     .footer { text-align: center; margin-top: 1.5rem; font-size: 0.82rem; color: #9ca3af; }
     .footer span { color: #ec4899; }
     #campo-descricao { display: none; }
@@ -67,10 +85,19 @@
     <p id="mes-atual"></p>
   </div>
 
+  <!-- Faturas Pendentes -->
+  <div class="card">
+    <div class="card-title">
+      📬 Faturas pendentes
+      <button class="btn-atualizar" onclick="carregarPendentes()">🔄 Atualizar</button>
+    </div>
+    <div id="pendentes-lista"><div class="carregando">Carregando…</div></div>
+  </div>
+
+  <!-- Lançar despesa -->
   <div class="card">
     <div class="card-title">➕ Lançar despesa</div>
 
-    <!-- Categoria -->
     <div class="field">
       <label><span class="dot dot-purple"></span>Categoria</label>
       <select id="categoria" onchange="atualizarFormulario()">
@@ -99,19 +126,16 @@
       </select>
     </div>
 
-    <!-- Descrição (para extras e parcelas livres) -->
     <div class="field" id="campo-descricao">
       <label><span class="dot dot-orange"></span>Descrição</label>
       <input type="text" id="descricao" placeholder="Descreva o gasto…" />
     </div>
 
-    <!-- Número da parcela -->
     <div class="field" id="campo-parcela">
       <label><span class="dot dot-orange"></span>Número da parcela</label>
       <input type="text" id="parcela-num" placeholder="Ex: 3/10" />
     </div>
 
-    <!-- Valor e Quem pagou -->
     <div class="row2">
       <div class="field">
         <label><span class="dot dot-pink"></span>Valor (R$)</label>
@@ -131,6 +155,7 @@
     <div class="msg" id="msg"></div>
   </div>
 
+  <!-- Resumo -->
   <div class="card">
     <div class="card-title">📊 Resumo do mês</div>
     <div class="resumo-grid">
@@ -144,6 +169,7 @@
     </button>
   </div>
 
+  <!-- Lista -->
   <div class="card">
     <div class="lista-header">
       <span class="lista-titulo">📋 Lançamentos do mês</span>
@@ -164,24 +190,96 @@ var CHAVE = "desp2-" + mesAtual;
 
 document.getElementById("mes-atual").textContent = mesAtual;
 
+// Carregar faturas pendentes
+function renderizarPendentes(pendentes) {
+  var div = document.getElementById("pendentes-lista");
+  if (!pendentes || !pendentes.length) {
+    div.innerHTML = '<div class="lista-vazia">Nenhuma fatura pendente 🎉</div>';
+    return;
+  }
+  var html = "";
+  pendentes.forEach(function(f, idx) {
+    html += '<div class="fatura-item" id="fatura-' + idx + '">';
+    html += '<div class="fatura-nome">' + f.nome + '</div>';
+    html += '<div class="fatura-detalhe">' + (f.mes||"") + ' · ' + (f.data||"") + '</div>';
+    html += '<div class="fatura-valor">' + fmt(f.valor) + '</div>';
+    html += '<div class="fatura-acoes">';
+    html += '<button class="btn-acao btn-adriana" onclick="confirmarPagamento(' + idx + ', &quot;Adriana&quot;)">👩 Adriana</button>';
+    html += '<button class="btn-acao btn-washington" onclick="confirmarPagamento(' + idx + ', &quot;Washington&quot;)">👨 Washington</button>';
+    html += '<button class="btn-acao btn-ambos" onclick="confirmarPagamento(' + idx + ', &quot;Ambos&quot;)">🤝 Ambos</button>';
+    html += '<button class="btn-acao btn-desconsiderar" onclick="confirmarPagamento(' + idx + ', &quot;Desconsiderado&quot;)">❌ Ignorar</button>';
+    html += '</div></div>';
+  });
+  div.innerHTML = html;
+  div._pendentes = pendentes;
+}
+
+function carregarPendentes() {
+  var div = document.getElementById("pendentes-lista");
+  div.innerHTML = '<div class="carregando">Carregando faturas…</div>';
+  var cbName = "jsonp_" + Date.now();
+  var script = document.createElement("script");
+  var timer = setTimeout(function() {
+    div.innerHTML = '<div class="lista-vazia">Erro ao carregar. Tente novamente.</div>';
+    delete window[cbName];
+    if (script.parentNode) script.parentNode.removeChild(script);
+  }, 15000);
+  window[cbName] = function(data) {
+    clearTimeout(timer);
+    delete window[cbName];
+    if (script.parentNode) script.parentNode.removeChild(script);
+    renderizarPendentes(data);
+  };
+  script.src = SCRIPT_URL + "?callback=" + cbName;
+  document.head.appendChild(script);
+}
+
+function confirmarPagamento(idx, responsavel) {
+  var div = document.getElementById("pendentes-lista");
+  var pendentes = div._pendentes;
+  if (!pendentes || !pendentes[idx]) return;
+  var f = pendentes[idx];
+  var item = document.getElementById("fatura-" + idx);
+  item.style.opacity = "0.5";
+
+  var status = responsavel === "Desconsiderado" ? "Desconsiderado" : "Pago";
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ acao: "atualizarStatus", data: f.data, nome: f.nome, responsavel: responsavel === "Desconsiderado" ? "" : responsavel, status: status })
+  }).catch(function(){});
+
+  // Se não desconsiderado, adiciona na lista local
+  if (responsavel !== "Desconsiderado") {
+    var lista = carregarDespesas();
+    lista.push({ nome: f.nome, valor: parseFloat(f.valor), responsavel: responsavel, parcela: "", tipo: f.tipo || "fixa", data: f.data, mes: f.mes || mesAtual });
+    salvarDespesas(lista);
+    renderizar();
+  }
+
+  item.remove();
+  pendentes.splice(idx, 1);
+
+  // Reindexar botões restantes
+  var itens = div.querySelectorAll(".fatura-item");
+  itens.forEach(function(el, i) { el.id = "fatura-" + i; el.querySelectorAll(".btn-acao").forEach(function(btn) { btn.setAttribute("onclick", btn.getAttribute("onclick").replace(/\d+,/, i + ",")); }); });
+  div._pendentes = pendentes;
+
+  if (!pendentes.length) div.innerHTML = '<div class="lista-vazia">Nenhuma fatura pendente 🎉</div>';
+}
+
 function atualizarFormulario() {
   var sel = document.getElementById("categoria").value;
   var campDesc = document.getElementById("campo-descricao");
   var campParc = document.getElementById("campo-parcela");
-
   if (!sel) { campDesc.style.display = "none"; campParc.style.display = "none"; return; }
-
   var partes = sel.split("|");
   var tipo = partes[2];
-  var respPadrao = partes[1];
-
-  // Mostrar campo descrição para extras e parcela livre
   campDesc.style.display = (tipo === "extra" || sel.startsWith("Outra parcela")) ? "block" : "none";
-  // Mostrar campo parcela para parcelas
   campParc.style.display = tipo === "parcela" ? "block" : "none";
-
-  // Atualizar responsável padrão
-  document.getElementById("responsavel").value = respPadrao || "Washington";
+  document.getElementById("responsavel").value = partes[1] || "Washington";
 }
 
 function carregarDespesas() {
@@ -220,7 +318,7 @@ function renderizar() {
     var tc = d.tipo === "fixa" ? "tipo-fixa" : d.tipo === "parcela" ? "tipo-parcela" : "tipo-extra";
     var tl = d.tipo === "fixa" ? "Fixa" : d.tipo === "parcela" ? "Parcela" : "Extra";
     var det = d.parcela ? "Parcela " + d.parcela : d.data;
-    html += '<div class="item"><div class="item-info"><div class="item-nome">' + d.nome + '<span class="tipo-tag ' + tc + '">' + tl + '</span></div><div class="item-detalhe">' + det + '</div><span class="item-resp ' + rc + '">' + d.responsavel + '</span></div><div class="item-valor">' + fmt(d.valor) + '</div></div>';
+    html += '<div class="item"><div class="item-top"><div class="item-info"><div class="item-nome">' + d.nome + '<span class="tipo-tag ' + tc + '">' + tl + '</span></div><div class="item-detalhe">' + det + '</div><span class="item-resp ' + rc + '">' + d.responsavel + '</span></div><div class="item-valor">' + fmt(d.valor) + '</div></div></div>';
   }
   c.innerHTML = html;
 }
@@ -250,7 +348,6 @@ function enviar() {
   var btn = document.getElementById("btn-enviar");
   var sel = document.getElementById("categoria").value;
   if (!sel) { mostrarMsg("Selecione a categoria.", "error"); return; }
-
   var partes = sel.split("|");
   var tipo = partes[2];
   var nomePadrao = partes[0];
@@ -258,30 +355,25 @@ function enviar() {
   var valor = document.getElementById("valor").value;
   var parcela = document.getElementById("parcela-num").value;
   var descricao = document.getElementById("descricao").value.trim();
-
-  // Nome final
   var nome = (tipo === "extra" || sel.startsWith("Outra parcela")) ? (descricao || nomePadrao) : nomePadrao;
-
   if (!valor) { mostrarMsg("Informe o valor.", "error"); return; }
   if ((tipo === "extra" || sel.startsWith("Outra parcela")) && !descricao) { mostrarMsg("Informe a descrição.", "error"); return; }
-
   btn.disabled = true; btn.textContent = "Enviando…";
   var data = new Date().toLocaleDateString("pt-BR");
   var reg = { nome: nome, valor: parseFloat(valor), responsavel: responsavel, parcela: parcela, tipo: tipo, data: data, mes: mesAtual };
   var lista = carregarDespesas(); lista.push(reg); salvarDespesas(lista); renderizar();
   mostrarMsg("✅ Despesa lançada!", "success");
-
   document.getElementById("categoria").value = "";
   document.getElementById("valor").value = "";
   document.getElementById("descricao").value = "";
   document.getElementById("parcela-num").value = "";
   document.getElementById("campo-descricao").style.display = "none";
   document.getElementById("campo-parcela").style.display = "none";
-
   fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(reg) }).catch(function(){}).finally(function() { btn.disabled = false; btn.textContent = "✨ Lançar despesa"; });
 }
 
 renderizar();
+carregarPendentes();
 </script>
 </body>
 </html>
