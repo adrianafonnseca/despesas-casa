@@ -87,11 +87,11 @@
 
   <!-- Faturas Pendentes -->
   <div class="card">
-    <div class="card-title">
-      📬 Faturas pendentes
-      <button class="btn-atualizar" onclick="carregarPendentes()">🔄 Atualizar</button>
-    </div>
-    <div id="pendentes-lista"><div class="carregando">Carregando…</div></div>
+    <div class="card-title">📬 Faturas recebidas por e-mail</div>
+    <p style="font-size:0.88rem;color:#6b7280;margin-bottom:1rem;">As faturas identificadas nos e-mails ficam na planilha com status <strong>Pendente</strong>. Abra para marcar quem pagou.</p>
+    <a href="https://docs.google.com/spreadsheets/d/1UCqP-GwLWeTqYROHb8KIuF-XXgsF9c6cZBrw9Rf3vY0/edit" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:0.85rem;border-radius:14px;background:#f0fdf4;border:1.5px solid #10b981;color:#065f46;font-family:Nunito,sans-serif;font-size:0.95rem;font-weight:800;text-decoration:none;">
+      📊 Abrir planilha de despesas
+    </a>
   </div>
 
   <!-- Lançar despesa -->
@@ -373,7 +373,6 @@ function enviar() {
 }
 
 renderizar();
-carregarPendentes();
 </script>
 </body>
 </html>
