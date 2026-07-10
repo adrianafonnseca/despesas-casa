@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Despesas da Casa 💰</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; min-height: 100vh; background: linear-gradient(135deg, #e0eaff 0%, #fce4f3 100%); padding: 2rem 1rem 4rem; }
+    .container { width: 100%; max-width: 520px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 2rem; }
+    .header .emoji { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+    .header h1 { font-size: 1.9rem; font-weight: 800; background: linear-gradient(90deg, #3b82f6, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.3rem; }
+    .header p { font-size: 0.95rem; color: #6b7280; }
+    .card { background: #fff; border-radius: 24px; padding: 1.75rem; box-shadow: 0 8px 32px rgba(59,130,246,.10); margin-bottom: 1.5rem; }
+    .card-title { font-size: 1rem; font-weight: 800; color: #1f2937; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; }
+    .badge-pend { background: #fef3c7; color: #92400e; font-size: 0.72rem; font-weight: 800; padding: 0.2rem 0.65rem; border-radius: 99px; }
+    .field { margin-bottom: 1.1rem; }
+    .field label { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; font-weight: 700; color: #6b7280; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-blue { background: #3b82f6; } .dot-pink { background: #ec4899; } .dot-purple { background: #a855f7; } .dot-orange { background: #f59e0b; } .dot-green { background: #10b981; }
+    .field select, .field input { width: 100%; border: 1.5px solid #e5e7eb; border-radius: 12px; padding: 0.65rem 1rem; font-family: 'Nunito', sans-serif; font-size: 1rem; color: #1f2937; background: #f9fafb; outline: none; transition: border-color 0.15s; }
+    .field select:focus, .field input:focus { border-color: #a855f7; box-shadow: 0 0 0 3px rgba(168,85,247,.15); background: #fff; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-enviar { width: 100%; padding: 0.9rem; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 800; cursor: pointer; color: #fff; margin-top: 0.25rem; background: linear-gradient(135deg, #3b82f6 0%, #a855f7 50%, #ec4899 100%); transition: opacity 0.15s; }
+    .btn-enviar:hover { opacity: 0.9; }
+    .btn-enviar:disabled { opacity: 0.6; cursor: not-allowed; }
+    .msg { margin-top: 0.85rem; padding: 0.7rem 1rem; border-radius: 10px; font-size: 0.92rem; font-weight: 600; text-align: center; display: none; }
+    .msg.success { background: #d1fae5; color: #065f46; display: block; }
+    .msg.error { background: #fee2e2; color: #991b1b; display: block; }
+    .resumo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+    .resumo-box { border-radius: 14px; padding: 1rem; text-align: center; }
+    .resumo-box.azul { background: #eff6ff; } .resumo-box.rosa { background: #fdf2f8; }
+    .resumo-box .nome { font-size: 0.78rem; font-weight: 700; color: #6b7280; text-transform: uppercase; margin-bottom: 4px; }
+    .resumo-box .valor { font-size: 1.4rem; font-weight: 800; }
+    .resumo-box.azul .valor { color: #2563eb; } .resumo-box.rosa .valor { color: #db2777; }
+    .saldo-box { border-radius: 14px; padding: 1rem 1.25rem; background: linear-gradient(135deg, #f3e8ff, #fce7f3); margin-bottom: 1.25rem; text-align: center; }
+    .saldo-box .label { font-size: 0.8rem; font-weight: 700; color: #7c3aed; text-transform: uppercase; margin-bottom: 4px; }
+    .saldo-box .valor { font-size: 1.3rem; font-weight: 800; color: #1f2937; }
+    .btn-whats { width: 100%; padding: 0.8rem; border: none; border-radius: 14px; font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; cursor: pointer; background: #25d366; color: #fff; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-whats:hover { opacity: 0.9; }
+    .lista-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .lista-titulo { font-size: 1rem; font-weight: 800; color: #1f2937; }
+    .badge { background: linear-gradient(135deg, #3b82f6, #ec4899); color: #fff; font-size: 0.72rem; font-weight: 800; padding: 0.2rem 0.65rem; border-radius: 99px; }
+    .item { padding: 0.85rem 0; border-bottom: 1px solid #f3f4f6; }
+    .item:last-child { border-bottom: none; }
+    .item-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .item-info { flex: 1; }
+    .item-nome { font-size: 0.97rem; font-weight: 700; color: #1f2937; }
+    .item-detalhe { font-size: 0.8rem; color: #6b7280; margin-top: 2px; }
+    .item-valor { font-size: 1rem; font-weight: 800; color: #1f2937; white-space: nowrap; }
+    .item-resp { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin-top: 3px; display: inline-block; }
+    .resp-adriana { background: #fce7f3; color: #db2777; } .resp-washington { background: #eff6ff; color: #2563eb; } .resp-ambos { background: #f3e8ff; color: #7c3aed; }
+    .tipo-tag { font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 99px; margin-left: 6px; }
+    .tipo-fixa { background: #d1fae5; color: #065f46; } .tipo-parcela { background: #fef3c7; color: #92400e; } .tipo-extra { background: #ede9fe; color: #5b21b6; }
+    .lista-vazia { text-align: center; color: #9ca3af; font-size: 0.95rem; padding: 1.5rem 0; }
+
+    /* Faturas pendentes */
+    .fatura-item { padding: 0.85rem; border: 1.5px solid #fef3c7; border-radius: 14px; background: #fffbeb; margin-bottom: 0.75rem; }
+    .fatura-nome { font-size: 0.97rem; font-weight: 800; color: #1f2937; margin-bottom: 2px; }
+    .fatura-detalhe { font-size: 0.8rem; color: #6b7280; margin-bottom: 0.75rem; }
+    .fatura-valor { font-size: 1.1rem; font-weight: 900; color: #92400e; }
+    .fatura-acoes { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-top: 0.75rem; }
+    .btn-acao { border: none; border-radius: 10px; padding: 0.5rem 0.25rem; font-family: 'Nunito', sans-serif; font-size: 0.72rem; font-weight: 800; cursor: pointer; transition: opacity 0.15s; }
+    .btn-acao:hover { opacity: 0.85; }
+    .btn-adriana { background: #fce7f3; color: #db2777; }
+    .btn-washington { background: #eff6ff; color: #2563eb; }
+    .btn-ambos { background: #f3e8ff; color: #7c3aed; }
+    .btn-desconsiderar { background: #f3f4f6; color: #6b7280; }
+    .btn-atualizar { border: none; background: #f3e8ff; color: #7c3aed; font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 700; padding: 0.5rem 1rem; border-radius: 99px; cursor: pointer; }
+    .carregando { text-align: center; color: #9ca3af; font-size: 0.9rem; padding: 1rem 0; }
+
+    .footer { text-align: center; margin-top: 1.5rem; font-size: 0.82rem; color: #9ca3af; }
+    .footer span { color: #ec4899; }
+    #campo-descricao { display: none; }
+    #campo-parcela { display: none; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <span class="emoji">💰</span>
+    <h1>Despesas da Casa</h1>
+    <p id="mes-atual"></p>
+  </div>
+
+  <!-- Faturas Pendentes -->
+  <div class="card">
+    <div class="card-title">📬 Faturas recebidas por e-mail</div>
+    <p style="font-size:0.88rem;color:#6b7280;margin-bottom:1rem;">As faturas identificadas nos e-mails ficam na planilha com status <strong>Pendente</strong>. Abra para marcar quem pagou.</p>
+    <a href="https://docs.google.com/spreadsheets/d/1UCqP-GwLWeTqYROHb8KIuF-XXgsF9c6cZBrw9Rf3vY0/edit" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:0.85rem;border-radius:14px;background:#f0fdf4;border:1.5px solid #10b981;color:#065f46;font-family:Nunito,sans-serif;font-size:0.95rem;font-weight:800;text-decoration:none;">
+      📊 Abrir planilha de despesas
+    </a>
+  </div>
+
+  <!-- Lançar despesa -->
+  <div class="card">
+    <div class="card-title">➕ Lançar despesa</div>
+
+    <div class="field">
+      <label><span class="dot dot-purple"></span>Categoria</label>
+      <select id="categoria" onchange="atualizarFormulario()">
+        <option value="">Selecione…</option>
+        <optgroup label="📌 Fixas">
+          <option value="Aluguel|Washington|fixa">Aluguel</option>
+          <option value="Garagem|Washington|fixa">Garagem</option>
+          <option value="Sky|Adriana|fixa">Sky</option>
+          <option value="Netflix|Adriana|fixa">Netflix</option>
+          <option value="Luz|Washington|fixa">Luz</option>
+          <option value="Condomínio|Washington|fixa">Condomínio</option>
+          <option value="Clube|Washington|fixa">Clube</option>
+          <option value="Casa Muriaé|Washington|fixa">Casa Muriaé</option>
+          <option value="Casa Ctz|Adriana|fixa">Casa Ctz</option>
+          <option value="Café|Washington|fixa">Café</option>
+          <option value="Liquidiz|Washington|fixa">Liquidiz</option>
+          <option value="Disney/Prime|Adriana|fixa">Disney/Prime</option>
+        </optgroup>
+        <optgroup label="🔄 Parcelas">
+          <option value="Pernambucanas|Adriana|parcela">Pernambucanas</option>
+          <option value="Outra parcela|Ambos|parcela">Outra parcela…</option>
+        </optgroup>
+        <optgroup label="⚡ Extras">
+          <option value="Extra|Adriana|extra">Gasto extra…</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="field" id="campo-descricao">
+      <label><span class="dot dot-orange"></span>Descrição</label>
+      <input type="text" id="descricao" placeholder="Descreva o gasto…" />
+    </div>
+
+    <div class="field" id="campo-parcela">
+      <label><span class="dot dot-orange"></span>Número da parcela</label>
+      <input type="text" id="parcela-num" placeholder="Ex: 3/10" />
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label><span class="dot dot-pink"></span>Valor (R$)</label>
+        <input type="number" id="valor" placeholder="0,00" step="0.01" />
+      </div>
+      <div class="field">
+        <label><span class="dot dot-blue"></span>Quem pagou</label>
+        <select id="responsavel">
+          <option value="Washington">Washington</option>
+          <option value="Adriana">Adriana</option>
+          <option value="Ambos">Ambos</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-enviar" id="btn-enviar" onclick="enviar()">✨ Lançar despesa</button>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <!-- Resumo -->
+  <div class="card">
+    <div class="card-title">📊 Resumo do mês</div>
+    <div class="resumo-grid">
+      <div class="resumo-box rosa"><div class="nome">Adriana pagou</div><div class="valor" id="total-adriana">R$ 0,00</div></div>
+      <div class="resumo-box azul"><div class="nome">Washington pagou</div><div class="valor" id="total-washington">R$ 0,00</div></div>
+    </div>
+    <div class="saldo-box"><div class="label">Acerto do mês</div><div class="valor" id="saldo-texto">Sem lançamentos ainda</div></div>
+    <button class="btn-whats" onclick="enviarWhatsApp()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.563 4.14 1.534 5.876L0 24l6.335-1.652A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.882a9.875 9.875 0 01-5.031-1.378l-.361-.214-3.741.976.999-3.648-.235-.374A9.861 9.861 0 012.118 12C2.118 6.533 6.533 2.118 12 2.118S21.882 6.533 21.882 12 17.467 21.882 12 21.882z"/></svg>
+      Enviar resumo pelo WhatsApp
+    </button>
+  </div>
+
+  <!-- Lista -->
+  <div class="card">
+    <div class="lista-header">
+      <span class="lista-titulo">📋 Lançamentos do mês</span>
+      <span class="badge" id="badge-count">0</span>
+    </div>
+    <div id="lista-itens"><div class="lista-vazia">Nenhuma despesa lançada ainda 💸</div></div>
+  </div>
+
+  <p class="footer">Feito com <span>♥</span> para vocês dois</p>
+</div>
+
+<script>
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeSFJPqmBBWJ5TdBqMHddjfsMUXsBryeHlXbSrZ5m3G3s5URNBKxPRePxw1A3wmVEbaw/exec";
+var MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+var agora = new Date();
+var mesAtual = MESES[agora.getMonth()] + " " + agora.getFullYear();
+var CHAVE = "desp2-" + mesAtual;
+
+document.getElementById("mes-atual").textContent = mesAtual;
+
+// Carregar faturas pendentes
+function renderizarPendentes(pendentes) {
+  var div = document.getElementById("pendentes-lista");
+  if (!pendentes || !pendentes.length) {
+    div.innerHTML = '<div class="lista-vazia">Nenhuma fatura pendente 🎉</div>';
+    return;
+  }
+  var html = "";
+  pendentes.forEach(function(f, idx) {
+    html += '<div class="fatura-item" id="fatura-' + idx + '">';
+    html += '<div class="fatura-nome">' + f.nome + '</div>';
+    html += '<div class="fatura-detalhe">' + (f.mes||"") + ' · ' + (f.data||"") + '</div>';
+    html += '<div class="fatura-valor">' + fmt(f.valor) + '</div>';
+    html += '<div class="fatura-acoes">';
+    html += '<button class="btn-acao btn-adriana" onclick="confirmarPagamento(' + idx + ', &quot;Adriana&quot;)">👩 Adriana</button>';
+    html += '<button class="btn-acao btn-washington" onclick="confirmarPagamento(' + idx + ', &quot;Washington&quot;)">👨 Washington</button>';
+    html += '<button class="btn-acao btn-ambos" onclick="confirmarPagamento(' + idx + ', &quot;Ambos&quot;)">🤝 Ambos</button>';
+    html += '<button class="btn-acao btn-desconsiderar" onclick="confirmarPagamento(' + idx + ', &quot;Desconsiderado&quot;)">❌ Ignorar</button>';
+    html += '</div></div>';
+  });
+  div.innerHTML = html;
+  div._pendentes = pendentes;
+}
+
+function carregarPendentes() {
+  var div = document.getElementById("pendentes-lista");
+  div.innerHTML = '<div class="carregando">Carregando faturas…</div>';
+  var cbName = "jsonp_" + Date.now();
+  var script = document.createElement("script");
+  var timer = setTimeout(function() {
+    div.innerHTML = '<div class="lista-vazia">Erro ao carregar. Tente novamente.</div>';
+    delete window[cbName];
+    if (script.parentNode) script.parentNode.removeChild(script);
+  }, 15000);
+  window[cbName] = function(data) {
+    clearTimeout(timer);
+    delete window[cbName];
+    if (script.parentNode) script.parentNode.removeChild(script);
+    renderizarPendentes(data);
+  };
+  script.src = SCRIPT_URL + "?callback=" + cbName;
+  document.head.appendChild(script);
+}
+
+function confirmarPagamento(idx, responsavel) {
+  var div = document.getElementById("pendentes-lista");
+  var pendentes = div._pendentes;
+  if (!pendentes || !pendentes[idx]) return;
+  var f = pendentes[idx];
+  var item = document.getElementById("fatura-" + idx);
+  item.style.opacity = "0.5";
+
+  var status = responsavel === "Desconsiderado" ? "Desconsiderado" : "Pago";
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ acao: "atualizarStatus", data: f.data, nome: f.nome, responsavel: responsavel === "Desconsiderado" ? "" : responsavel, status: status })
+  }).catch(function(){});
+
+  // Se não desconsiderado, adiciona na lista local
+  if (responsavel !== "Desconsiderado") {
+    var lista = carregarDespesas();
+    lista.push({ nome: f.nome, valor: parseFloat(f.valor), responsavel: responsavel, parcela: "", tipo: f.tipo || "fixa", data: f.data, mes: f.mes || mesAtual });
+    salvarDespesas(lista);
+    renderizar();
+  }
+
+  item.remove();
+  pendentes.splice(idx, 1);
+
+  // Reindexar botões restantes
+  var itens = div.querySelectorAll(".fatura-item");
+  itens.forEach(function(el, i) { el.id = "fatura-" + i; el.querySelectorAll(".btn-acao").forEach(function(btn) { btn.setAttribute("onclick", btn.getAttribute("onclick").replace(/\d+,/, i + ",")); }); });
+  div._pendentes = pendentes;
+
+  if (!pendentes.length) div.innerHTML = '<div class="lista-vazia">Nenhuma fatura pendente 🎉</div>';
+}
+
+function atualizarFormulario() {
+  var sel = document.getElementById("categoria").value;
+  var campDesc = document.getElementById("campo-descricao");
+  var campParc = document.getElementById("campo-parcela");
+  if (!sel) { campDesc.style.display = "none"; campParc.style.display = "none"; return; }
+  var partes = sel.split("|");
+  var tipo = partes[2];
+  campDesc.style.display = (tipo === "extra" || sel.startsWith("Outra parcela")) ? "block" : "none";
+  campParc.style.display = tipo === "parcela" ? "block" : "none";
+  document.getElementById("responsavel").value = partes[1] || "Washington";
+}
+
+function carregarDespesas() {
+  try { return JSON.parse(localStorage.getItem(CHAVE) || "[]"); } catch(e) { return []; }
+}
+
+function salvarDespesas(lista) { localStorage.setItem(CHAVE, JSON.stringify(lista)); }
+
+function fmt(v) { return "R$ " + Number(v||0).toLocaleString("pt-BR", {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+function calcularResumo(lista) {
+  var a = 0, w = 0;
+  for (var i = 0; i < lista.length; i++) {
+    var v = parseFloat(lista[i].valor) || 0;
+    if (lista[i].responsavel === "Adriana") a += v;
+    else if (lista[i].responsavel === "Washington") w += v;
+    else { a += v/2; w += v/2; }
+  }
+  var t = a + w, d = a - t/2;
+  document.getElementById("total-adriana").textContent = fmt(a);
+  document.getElementById("total-washington").textContent = fmt(w);
+  var s = lista.length === 0 ? "Sem lançamentos ainda" : Math.abs(d) < 0.01 ? "✅ Estão quites!" : d > 0 ? "Washington deve " + fmt(d) + " para Adriana" : "Adriana deve " + fmt(Math.abs(d)) + " para Washington";
+  document.getElementById("saldo-texto").textContent = s;
+}
+
+function renderizar() {
+  var lista = carregarDespesas();
+  document.getElementById("badge-count").textContent = lista.length;
+  calcularResumo(lista);
+  var c = document.getElementById("lista-itens");
+  if (lista.length === 0) { c.innerHTML = '<div class="lista-vazia">Nenhuma despesa lançada ainda 💸</div>'; return; }
+  var html = "";
+  for (var i = lista.length - 1; i >= 0; i--) {
+    var d = lista[i];
+    var rc = d.responsavel === "Adriana" ? "resp-adriana" : d.responsavel === "Washington" ? "resp-washington" : "resp-ambos";
+    var tc = d.tipo === "fixa" ? "tipo-fixa" : d.tipo === "parcela" ? "tipo-parcela" : "tipo-extra";
+    var tl = d.tipo === "fixa" ? "Fixa" : d.tipo === "parcela" ? "Parcela" : "Extra";
+    var det = d.parcela ? "Parcela " + d.parcela : d.data;
+    html += '<div class="item"><div class="item-top"><div class="item-info"><div class="item-nome">' + d.nome + '<span class="tipo-tag ' + tc + '">' + tl + '</span></div><div class="item-detalhe">' + det + '</div><span class="item-resp ' + rc + '">' + d.responsavel + '</span></div><div class="item-valor">' + fmt(d.valor) + '</div></div></div>';
+  }
+  c.innerHTML = html;
+}
+
+function mostrarMsg(texto, tipo) {
+  var m = document.getElementById("msg"); m.textContent = texto; m.className = "msg " + tipo;
+  setTimeout(function() { m.className = "msg"; }, 4000);
+}
+
+function enviarWhatsApp() {
+  var lista = carregarDespesas();
+  if (!lista.length) { alert("Nenhuma despesa lançada ainda!"); return; }
+  var a = 0, w = 0;
+  for (var i = 0; i < lista.length; i++) {
+    var v = parseFloat(lista[i].valor) || 0;
+    if (lista[i].responsavel === "Adriana") a += v;
+    else if (lista[i].responsavel === "Washington") w += v;
+    else { a += v/2; w += v/2; }
+  }
+  var t = a + w, d = a - t/2;
+  var txt = "💰 *Despesas da Casa — " + mesAtual + "*\n\n👩 Adriana pagou: " + fmt(a) + "\n👨 Washington pagou: " + fmt(w) + "\n📦 Total: " + fmt(t) + "\n\n";
+  txt += Math.abs(d) < 0.01 ? "✅ Estão quites!" : d > 0 ? "➡️ Washington deve pagar " + fmt(d) + " para Adriana" : "➡️ Adriana deve pagar " + fmt(Math.abs(d)) + " para Washington";
+  window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
+}
+
+function enviar() {
+  var btn = document.getElementById("btn-enviar");
+  var sel = document.getElementById("categoria").value;
+  if (!sel) { mostrarMsg("Selecione a categoria.", "error"); return; }
+  var partes = sel.split("|");
+  var tipo = partes[2];
+  var nomePadrao = partes[0];
+  var responsavel = document.getElementById("responsavel").value;
+  var valor = document.getElementById("valor").value;
+  var parcela = document.getElementById("parcela-num").value;
+  var descricao = document.getElementById("descricao").value.trim();
+  var nome = (tipo === "extra" || sel.startsWith("Outra parcela")) ? (descricao || nomePadrao) : nomePadrao;
+  if (!valor) { mostrarMsg("Informe o valor.", "error"); return; }
+  if ((tipo === "extra" || sel.startsWith("Outra parcela")) && !descricao) { mostrarMsg("Informe a descrição.", "error"); return; }
+  btn.disabled = true; btn.textContent = "Enviando…";
+  var data = new Date().toLocaleDateString("pt-BR");
+  var reg = { nome: nome, valor: parseFloat(valor), responsavel: responsavel, parcela: parcela, tipo: tipo, data: data, mes: mesAtual };
+  var lista = carregarDespesas(); lista.push(reg); salvarDespesas(lista); renderizar();
+  mostrarMsg("✅ Despesa lançada!", "success");
+  document.getElementById("categoria").value = "";
+  document.getElementById("valor").value = "";
+  document.getElementById("descricao").value = "";
+  document.getElementById("parcela-num").value = "";
+  document.getElementById("campo-descricao").style.display = "none";
+  document.getElementById("campo-parcela").style.display = "none";
+  fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(reg) }).catch(function(){}).finally(function() { btn.disabled = false; btn.textContent = "✨ Lançar despesa"; });
+}
+
+renderizar();
+</script>
+</body>
+</html>
